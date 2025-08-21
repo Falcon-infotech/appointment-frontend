@@ -1,0 +1,1 @@
+export const baseUrl = 'https://appointment-backend-dev.onrender.com'
