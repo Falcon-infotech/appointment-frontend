@@ -39,7 +39,6 @@ const items = [
   { title: "Courses", url: "/courses", icon: Book },
   { title: "Instructor", url: "/instructor", icon: Users },
   { title: "Batches", url: "/batches", icon: BarChartHorizontalBig },
-  // { title: "Schedule Batches", url: "/schedule-batches", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -245,13 +244,13 @@ export function AppSidebar() {
 
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1 px-2">
-              {items.map((item) => {
-                const isActive = location.pathname === item.url;
+              {items?.map((item) => {
+                const isActive = location?.pathname === item?.url;
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item?.title}>
                     <SidebarMenuButton asChild>
                       <Link
-                        to={item.url}
+                        to={item?.url}
                         className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 
                           ${isActive
                             ? "bg-sky-500 text-white font-semibold shadow-sm hover:bg-sky-500"
@@ -264,7 +263,7 @@ export function AppSidebar() {
                             : "text-gray-500 group-hover:scale-110"
                             }`}
                         />
-                        {<span>{item.title}</span>}
+                        {<span>{item?.title}</span>}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

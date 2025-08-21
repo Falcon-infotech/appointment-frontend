@@ -258,7 +258,7 @@ export function DashboardArea() {
                   </div>
                 </div>
                 <DialogFooter className="mt-5">
-                  <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
                   <Button type="submit" >Save changes</Button>
                 </DialogFooter>
               </form>

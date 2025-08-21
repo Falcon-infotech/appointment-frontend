@@ -36,7 +36,7 @@ export default function MultiSelect({
     }
 
     console.log(options)
-    
+
 
     return (
         <div>
@@ -49,7 +49,7 @@ export default function MultiSelect({
                             //     .filter((opt) => value.includes(opt.value))
                             //     .map((opt) => opt.label)
                             //     .join(", ")
-                             `${value.length} selected`
+                            `${value.length} selected`
                             : placeholder}
                         <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                     </Button>

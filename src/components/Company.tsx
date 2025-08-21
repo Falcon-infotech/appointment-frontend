@@ -13,7 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -48,6 +51,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import api from "../constants/axiosInstance";
 
 interface Branch {
   _id: string;
@@ -76,11 +80,14 @@ export default function Company() {
   const [err, setErr] = useState<{ [key: string]: string } | null>(null);
   const [open, setOpen] = useState(false);
   const [addloading, setAddLoading] = useState(false);
-
+  // {{base_url}}/api/branch/:id
   // Add/Edit mode states
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranchId, setEditingBranchId] = useState<string | null>(null);
   const [courses, setCourses] = useState<string[]>([]);
+  const [branchById, setBranchById] = useState<Branch>()
+  const [drawer, setDrawer] = useState<Boolean>(false)
+  const [loadingBranch, setLoadingBranch] = useState(false);
 
   const [newCompany, setNewCompany] = useState<NewCompany>({
     branchName: "",
@@ -89,6 +96,33 @@ export default function Company() {
     address: "",
     courseIds: [],
   });
+
+
+  function validation() {
+    let error: { [key: string]: string } = {};
+    if (!newCompany.branchName) error.branchName = "Branch name is required";
+    if (!newCompany.country) error.country = "Country is required";
+    if (!newCompany.branchCode) error.branchCode = "Branch code is required";
+    if (!newCompany.address) error.address = "Address is required";
+    setErr(error);
+    return Object.keys(error).length === 0;
+  }
+
+
+  const resetForm = () => {
+    setNewCompany({
+      branchName: "",
+      country: "",
+      branchCode: "",
+      address: "",
+      courseIds: [],
+    });
+    setIsAddDialogOpen(false);
+    setIsEditMode(false);
+    setEditingBranchId(null);
+    setErr(null);
+  };
+
 
   const handleCourseChange = (courseId: string) => {
     setNewCompany((prev) => {
@@ -120,6 +154,8 @@ export default function Company() {
     fetchCourses();
   }, []);
 
+  // initial load
+
   const fetchAllBranches = async (flag: boolean) => {
     if (flag) setLoadingBranches(true);
     try {
@@ -133,16 +169,8 @@ export default function Company() {
     }
   };
 
-  function validation() {
-    let error: { [key: string]: string } = {};
-    if (!newCompany.branchName) error.branchName = "Branch name is required";
-    if (!newCompany.country) error.country = "Country is required";
-    if (!newCompany.branchCode) error.branchCode = "Branch code is required";
-    if (!newCompany.address) error.address = "Address is required";
-    setErr(error);
-    return Object.keys(error).length === 0;
-  }
 
+  // add and edit
   const handleSubmitCompany = async () => {
     if (!validation()) return;
     setAddLoading(true);
@@ -170,20 +198,7 @@ export default function Company() {
     }
   };
 
-  const resetForm = () => {
-    setNewCompany({
-      branchName: "",
-      country: "",
-      branchCode: "",
-      address: "",
-      courseIds: [],
-    });
-    setIsAddDialogOpen(false);
-    setIsEditMode(false);
-    setEditingBranchId(null);
-    setErr(null);
-  };
-
+  // delete branch
   const handleDeleteBranch = async (id: string) => {
 
     const prevState = [...branches];
@@ -211,11 +226,33 @@ export default function Company() {
   };
 
 
+  // get single by id
+
+  const getById = async (id: string) => {
+    try {
+      setLoadingBranch(true);
+      setBranchById(null);
+      const response = await api.get(`${baseUrl}/api/branch/${id}`);
+      setBranchById(response.data.branch);
+    } catch (error) {
+      console.error("Error fetching branch:", error);
+    } finally {
+      setLoadingBranch(false);
+    }
+  };
+
+  const handleRowClick = (id: string) => {
+    setDrawer(true);
+    getById(id);
+  };
+
+
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-4 py-3 border-b flex justify-between items-center">
-         <div className="flex items-center gap-2 p-3">
+        <div className="flex items-center gap-2 p-3">
           <Building className="h-6 w-6 text-blue-600" />
           <h2 className="text-xl font-semibold">Company Management</h2>
         </div>
@@ -348,7 +385,6 @@ export default function Company() {
           </p>
         ) : (
           <Table>
-            {/* <TableCaption>A list of company branches</TableCaption> */}
             <TableHeader>
               <TableRow>
                 <TableHead>Branch Name</TableHead>
@@ -372,8 +408,14 @@ export default function Company() {
                       .includes(searchTerm.toLowerCase())
                 )
                 .map((branch) => (
-                  <TableRow key={branch._id}>
-                    <TableCell className="font-medium">{branch.branchName}</TableCell>
+                  <TableRow
+                    key={branch._id}
+                    className="cursor-pointer hover:bg-blue-50"
+                    onClick={() => handleRowClick(branch._id)}
+                  >
+                    <TableCell className="font-medium">
+                      {branch.branchName}
+                    </TableCell>
                     <TableCell>
                       <Badge className="bg-blue-50 text-blue-600 border-blue-200">
                         {branch.country}
@@ -382,23 +424,17 @@ export default function Company() {
                     <TableCell>{branch.branchCode}</TableCell>
                     <TableCell>{branch.address}</TableCell>
                     <TableCell>{branch?.courseIds?.length}</TableCell>
-                    <TableCell>{new Date(branch.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      {new Date(branch.createdAt).toLocaleDateString()}
+                    </TableCell>
                     <TableCell className="flex justify-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => {
-                          setIsEditMode(true);
-                          setEditingBranchId(branch._id);
-                          setNewCompany({
-                            branchName: branch.branchName,
-                            country: branch.country,
-                            branchCode: branch.branchCode,
-                            address: branch.address,
-                            courseIds: branch.courseIds || [],
-                          });
-                          setIsAddDialogOpen(true);
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent row modal
+                          // edit logic
                         }}
                       >
                         <Edit className="h-4 w-4" /> Edit
@@ -407,7 +443,10 @@ export default function Company() {
                         variant="destructive"
                         size="sm"
                         className="flex items-center gap-1"
-                        onClick={() => handleDeleteBranch(branch._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteBranch(branch._id);
+                        }}
                       >
                         <Trash2 className="h-4 w-4" /> Delete
                       </Button>
@@ -415,10 +454,130 @@ export default function Company() {
                   </TableRow>
                 ))}
             </TableBody>
-
           </Table>
         )}
       </div>
+
+      {/* Modal */}
+     <Dialog open={drawer} onOpenChange={setDrawer}>
+  <DialogContent className="sm:max-w-[750px] rounded-2xl shadow-2xl">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold text-gray-800">
+        {loadingBranch ? "Loading branch..." : branchById?.branchName}
+      </DialogTitle>
+      <DialogDescription className="text-gray-500">
+        {loadingBranch
+          ? "Fetching details..."
+          : "Here are the complete details of the selected branch."}
+      </DialogDescription>
+    </DialogHeader>
+
+    {loadingBranch ? (
+      <div className="flex justify-center items-center h-48">
+        <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    ) : branchById ? (
+      <div className="space-y-6">
+        {/* Branch Info */}
+        <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border">
+          <div>
+            <p className="text-xs uppercase text-gray-500 tracking-wide">
+              Country
+            </p>
+            <p className="text-base font-semibold text-gray-800">
+              {branchById.country}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs uppercase text-gray-500 tracking-wide">
+              Branch Code
+            </p>
+            <p className="text-base font-semibold text-gray-800">
+              {branchById.branchCode}
+            </p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-xs uppercase text-gray-500 tracking-wide">
+              Address
+            </p>
+            <p className="text-base font-semibold text-gray-800">
+              {branchById.address}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs uppercase text-gray-500 tracking-wide">
+              Created At
+            </p>
+            <p className="text-sm font-medium text-green-700">
+              {new Date(branchById.createdAt).toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs uppercase text-gray-500 tracking-wide">
+              Updated At
+            </p>
+            <p className="text-sm font-medium text-blue-700">
+              {new Date(branchById.updatedAt).toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        {/* Courses */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">
+            Assigned Courses
+          </h3>
+          {branchById.courseIds?.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-1/4">Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="w-1/6 text-center">Duration</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {branchById.courseIds.map((course, idx) => (
+                  <TableRow
+                    key={course._id}
+                    className={idx % 2 === 0 ? "bg-gray-50" : ""}
+                  >
+                    <TableCell className="font-medium text-gray-800">
+                      {course.name}
+                    </TableCell>
+                    <TableCell className="text-gray-600">
+                      {course.description || "-"}
+                    </TableCell>
+                    <TableCell className="text-center text-gray-700">
+                      {course.duration ? `${course.duration} Days` : "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-sm text-gray-500 italic">
+              No courses assigned to this branch.
+            </p>
+          )}
+        </div>
+      </div>
+    ) : (
+      <p className="text-sm text-red-500 text-center py-6">
+        Failed to load branch details.
+      </p>
+    )}
+
+    <DialogFooter>
+      <DialogClose asChild>
+        <Button variant="outline" className="rounded-lg">
+          Close
+        </Button>
+      </DialogClose>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
     </div>
   );
 }

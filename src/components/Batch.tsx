@@ -9,6 +9,7 @@ import { Label } from './ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Input } from './ui/input'
 import toast from 'react-hot-toast'
+import { Item } from '@radix-ui/react-select'
 
 
 
@@ -19,6 +20,8 @@ const Batch = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [batch, setBatch] = useState([])
     const [] = useState()
+    const [dialogOpen, setDialogOpen] = useState(false);
+
     const [formData, setFormData] = useState({
         batch: "",
         batchName: "",
@@ -46,26 +49,25 @@ const Batch = () => {
     }
     const [editingId, setEditingId] = useState<string | null>(null);
 
+    const fetchBatches = async (flag: boolean) => {
+        if (flag) setLoading(true)
+        try {
 
+            const response = await api.get(`${baseUrl}/api/batch/all`)
+            const data = response.data.batches
+            console.log(data)
+            setBatch(data || [])
+        } catch (error) {
+            console.error(error)
+
+        } finally {
+            setLoading(false)
+        }
+    }
 
 
     useEffect(() => {
-        const fetchBatches = async () => {
-            try {
-                setLoading(true)
-                const response = await api.get(`${baseUrl}/api/batch/all`)
-                const data = response.data.batches
-                console.log(data)
-                setBatch(data || [])
-            } catch (error) {
-                console.error(error)
-
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchBatches()
+        fetchBatches(true)
     }, [])
 
     const [branches, setBranches] = useState([])
@@ -172,33 +174,63 @@ const Batch = () => {
         return Object.values(err).length === 0;
     };
 
-     const handleDelete = async (id: string) => {
-            try {
-                await api.delete(`/api/batch/${id}`);
-                // fetchBatches();
-            } catch (error) {
-                console.error(error);
-            }
+    const handleDelete = async (id: string) => {
+        const prevBranches = [...branches];
+
+        setBranches((prev) => prev.filter((item) => item.id !== id));
+
+        try {
+            await api.delete(`${baseUrl}/api/batch/${id}`);
+        } catch (error) {
+            console.error("Delete failed, rolling back:", error);
+
+            setBranches(prevBranches);
+        }
+    };
+
+
+
+    const handleEdit = async () => {
+        console.log(editingId)
+        if (!validateForm()) return;
+
+        const prevBatches = [...batch];
+
+        const payload = {
+            branchId: formData.branchName,
+            courseId: formData.course,
+            fromDate: formData.startDate,
+            toDate: formData.endDate,
+            code: formData.batch,
+            inspectorId: formData.instructorName,
+            name: formData.batchName,
         };
 
+        setBatch(prev =>
+            prev.map(b =>
+                b._id === editingId
+                    ? {
+                        ...b,
+                        _id: editingId,
+                        code: formData.batch,
+                        name: formData.batchName,
+                        fromDate: formData.startDate,
+                        toDate: formData.endDate,
+                        branchId: branches.find(x => x._id === formData.branchName) || b.branchId,
+                        courseId: courses.find(x => x._id === formData.course) || b.courseId,
+                        inspectorId: instructer.find(x => x._id === formData.instructorName) || b.inspectorId,
+                    }
+                    : b
+            )
+        );
+        setDialogOpen(false);
 
-    const handleSubmit = async () => {
-        if (!validateForm()) {
-            return
-        }
         try {
-            const payload = {
-                "branchId": formData.branchName,
-                "courseId": formData.course,
-                "fromDate": formData.startDate,
-                "toDate": formData.endDate,
-                "code": formData.batch,
-                "inspectorId": formData.instructorName,
-                "name": formData.batchName,
-            }
-            const result = await api.post(`${baseUrl}/api/batch/bookBatch`, payload)
+            const result = await api.put(`${baseUrl}/api/batch/${editingId}`, payload);
+
             if (result.status === 201) {
                 toast.success("Batch Scheduled Successfully");
+
                 setFormData({
                     batch: "",
                     batchName: "",
@@ -206,15 +238,20 @@ const Batch = () => {
                     course: "",
                     endDate: "",
                     instructorName: "",
-                    startDate: ""
-                })
+                    startDate: "",
+                });
 
             }
+            // fetchBatches(false)
         } catch (error) {
-            console.error(error)
-            toast.error("something happen while creating batch")
+            console.error(error);
+            toast.error("Something went wrong while editing batch");
+
+            // rollback
+            setBatch(prevBatches);
         }
     };
+
 
     return (
         <div>
@@ -273,24 +310,8 @@ const Batch = () => {
                                         })}
                                     </TableCell>
                                     <TableCell className="flex justify-center gap-2">
-                                        {/* <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="flex items-center gap-1"
-                                            onClick={() => {
-                                                // setForm({
-                                                //   name: b.name,
-                                                //   code: b.code,
-                                                //   branch: b.branchId?.branchName,
-                                                //   inspector: b.inspectorId?.name,
-                                                // })
-                                                // setEditingId(b._id)
-                                                // setOpen(true)
-                                            }}
-                                        >
-                                            <Edit className="h-4 w-4" /> Edit
-                                        </Button> */}
-                                        <Dialog>
+
+                                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                                             <DialogTrigger asChild>
                                                 <Button
                                                     variant="outline"
@@ -301,7 +322,7 @@ const Batch = () => {
                                                             batch: b.code || "",
                                                             batchName: b.name || "",
                                                             branchName: b.branchId?._id || "",
-                                                            course: b.course?._id || "",
+                                                            course: b.courseId?._id || "",
                                                             startDate: b.fromDate?.split("T")[0] || "",
                                                             endDate: b.toDate?.split("T")[0] || "",
                                                             instructorName: b.inspectorId?._id || "",
@@ -326,15 +347,7 @@ const Batch = () => {
                                                     {/* Batch */}
                                                     <div className="space-y-2">
                                                         <Label>Batch Code *</Label>
-                                                        {/* <Select onValueChange={(v) => handleChange("batch", v)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Batch" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="batch1">Batch 1</SelectItem>
-                          <SelectItem value="batch2">Batch 2</SelectItem>
-                        </SelectContent>
-                      </Select> */}
+
                                                         <Input
                                                             type="text"
                                                             onChange={(v) => handleChange("batch", v.target.value)}
@@ -349,15 +362,7 @@ const Batch = () => {
                                                     {/* Batch Name */}
                                                     <div className="space-y-2">
                                                         <Label>Batch Name *</Label>
-                                                        {/* <Select onValueChange={(v) => handleChange("batchName", v)}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Batch Name" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="alpha">Alpha</SelectItem>
-                            <SelectItem value="beta">Beta</SelectItem>
-                          </SelectContent>
-                        </Select> */}
+
                                                         <Input
                                                             type="text"
                                                             onChange={(v) => handleChange("batchName", v.target.value)}
@@ -371,7 +376,7 @@ const Batch = () => {
                                                     {/* Branch */}
                                                     <div className="space-y-2">
                                                         <Label>Branch Name *</Label>
-                                                        <Select onValueChange={(v) => handleChange("branchName", v)}>
+                                                        <Select onValueChange={(v) => handleChange("branchName", v)} value={formData.branchName}  >
                                                             <SelectTrigger className="w-full">
                                                                 <SelectValue placeholder="Select Branch Name" />
                                                             </SelectTrigger>
@@ -392,7 +397,8 @@ const Batch = () => {
                                                     {/* Course */}
                                                     <div className="space-y-2">
                                                         <Label>Course *</Label>
-                                                        <Select onValueChange={(v) => handleChange("course", v)}>
+                                                        <Select onValueChange={(v) => handleChange("course", v)} value={formData.course}
+                                                        >
                                                             <SelectTrigger className="w-full">
                                                                 <SelectValue placeholder="Select Course" />
                                                             </SelectTrigger>
@@ -473,19 +479,6 @@ const Batch = () => {
 
 
 
-                                                    {/* Scheduled By */}
-                                                    {/* <div className="space-y-2 sm:col-span-2">
-                      <Label>Scheduled By *</Label>
-                      <Select onValueChange={(v) => handleChange("scheduledBy", v)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Person" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div> */}
                                                 </div>
 
                                                 {/* Footer */}
@@ -495,7 +488,8 @@ const Batch = () => {
                                                     </DialogClose>
                                                     <Button
                                                         className="bg-blue-600 hover:bg-blue-700"
-                                                        onClick={handleSubmit}
+                                                        onClick={handleEdit}
+                                                        type='submit'
                                                     >
                                                         Save
                                                     </Button>

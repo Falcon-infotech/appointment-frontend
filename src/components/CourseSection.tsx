@@ -99,10 +99,7 @@ export function CoursesSection({ company }: CoursesSectionProps) {
   }, []);
 
 
-  useEffect(() => {
-    console.log(instructer)
-    console.log(branch)
-  })
+  
 
 
   const fetchCourses = async (flag: boolean) => {
@@ -112,7 +109,7 @@ export function CoursesSection({ company }: CoursesSectionProps) {
       }
       const response = await axios.get(`${baseUrl}/api/course/all`)
       const data = response.data
-      // console.log(data.courses)
+      console.log(data.courses)
       setCourses(data.courses)
     } catch (error) {
       console.error(error);
@@ -252,227 +249,223 @@ export function CoursesSection({ company }: CoursesSectionProps) {
       </div>
 
 
-      {loading ? (<div className="flex justify-center items-center h-40">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>) :
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <Card key={course.name} className="bg-gradient-card border-0 shadow-sm hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-lg leading-tight">{course.name}</CardTitle>
-                  <Badge className={getLevelColor(course.name)}>
-                    {course.name}
-                  </Badge>
-                </div>
-                <Badge variant="outline" className="w-fit">
-                  {course.name}
-                </Badge>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {course.description}
-                </p>
+     {loading ? (
+  <div className="flex justify-center items-center h-40">
+    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+) : (
+  <div className="overflow-x-auto rounded-lg shadow">
+    <table className="min-w-full border border-gray-200 text-sm">
+      <thead className="bg-gray-100 text-gray-700">
+        <tr>
+          <th className="px-6 py-3 border-b text-center font-semibold">Sr no</th>
+          <th className="px-6 py-3 border-b text-center font-semibold">Name</th>
+          <th className="px-6 py-3 border-b text-center font-semibold">Description</th>
+          <th className="px-6 py-3 border-b text-center font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200">
+        {courses.map((course, index) => (
+          <tr key={course._id} className="hover:bg-gray-50">
+            <td className="px-6 py-3 text-center">{index + 1}</td>
+            <td className="px-6 py-3 text-center font-medium">{course.name}</td>
+            <td className="px-6 py-3 text-center text-gray-600">
+              {course.description}
+            </td>
+            <td className="px-6 py-3">
+              <div className="flex justify-center gap-2">
+                {/* View Course */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="flex items-center"
+                      onClick={() => setSelectedCourse(course)}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-semibold">
+                        Schedule: {course.name}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                      <ScheduleCourseForm course={course} company={company} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
-            
+                {/* Edit Course */}
+                <Dialog open={updateOpen} onOpenChange={setUpdateOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="flex items-center"
+                      onClick={() => setSelectedCourse(course)}
+                    >
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Course</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Label>Name</Label>
+                      <Input
+                        value={selectedCourse?.name || ""}
+                        placeholder="Course Name"
+                        onChange={(e) =>
+                          setSelectedCourse({
+                            ...selectedCourse!,
+                            name: e.target.value,
+                          })
+                        }
+                      />
 
-                {/* Inside CardContent > .flex items-center gap-3 */}
-                <div className="flex items-center gap-3">
-                  {/* View Course */}
-                  <Dialog>
-                    <DialogTrigger asChild>
+                      <Label>Description</Label>
+                      <Input
+                        value={selectedCourse?.description || ""}
+                        placeholder="Description"
+                        onChange={(e) =>
+                          setSelectedCourse({
+                            ...selectedCourse!,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+
+                      {/* MultiSelects */}
+                      <Label>Select Inspector</Label>
+                      <MultiSelect
+                        options={instructer}
+                        value={selectedCourse?.inspectorIds || []}
+                        onChange={(val) =>
+                          setSelectedCourse({
+                            ...selectedCourse!,
+                            inspectorIds: val,
+                          })
+                        }
+                      />
+
+                      <Label>Select Branch</Label>
+                      <MultiSelect
+                        options={branch}
+                        value={selectedCourse?.branchIds || []}
+                        onChange={(val) =>
+                          setSelectedCourse({
+                            ...selectedCourse!,
+                            branchIds: val,
+                          })
+                        }
+                      />
+
                       <Button
-                        className="flex items-center"
-                        onClick={() => setSelectedCourse(course)}
-                      >
-                        <Calendar className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold">
-                          Schedule: {course.name}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="py-4">
-                        <ScheduleCourseForm course={course} company={company} />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Edit Course */}
-                  <Dialog open={updateOpen} onOpenChange={setUpdateOpen}>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        className="flex items-center"
-                        onClick={() => setSelectedCourse(course)}
-                      >
-                        <BookOpen className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Course</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        {/* Pre-filled form */}
-                        <Label className="">
-                          Name
-                        </Label>
-                        <Input
-                          value={selectedCourse?.name || ""}
-                          placeholder="Course Name"
-                          onChange={(e) =>
-                            setSelectedCourse({ ...selectedCourse!, name: e.target.value })
-                          }
-                        />
-
-                        <Label className="">
-                          Description
-                        </Label>
-                        <Input
-                          value={selectedCourse?.description || ""}
-                          placeholder="Description"
-                          onChange={(e) =>
-                            setSelectedCourse({
-                              ...selectedCourse!,
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                        {/* MultiSelect for inspectorIds */}
-                        <Label className="">
-                          Select Inspector
-
-                        </Label>
-                        <MultiSelect
-                          options={instructer}
-                          value={selectedCourse?.inspectorIds || []}
-                          onChange={(val) =>
-                            setSelectedCourse({ ...selectedCourse!, inspectorIds: val })
-                          }
-
-                        />
-                        {/* MultiSelect for branchIds */}
-                        <Label className="">
-                          Select Branch
-                        </Label>
-                        <MultiSelect
-                          options={branch}
-                          value={selectedCourse?.branchIds || []}
-                          onChange={(val) =>
-                            setSelectedCourse({ ...selectedCourse!, branchIds: val })
-                          }
-                        />
-
-                        <Button
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                          onClick={async () => {
-                            if (!selectedCourse) return;
-
-                            // backup old courses list
-                            const prevCourses = [...courses];
-
-                            // optimistic update: update UI immediately
-                            setCourses((prev) =>
-                              prev.map((c) =>
-                                c._id === selectedCourse._id ? { ...selectedCourse } : c
-                              )
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={async () => {
+                          if (!selectedCourse) return;
+                          const prevCourses = [...courses];
+                          setCourses((prev) =>
+                            prev.map((c) =>
+                              c._id === selectedCourse._id
+                                ? { ...selectedCourse }
+                                : c
+                            )
+                          );
+                          try {
+                            setUpdateLoading(true);
+                            const res = await axios.put(
+                              `${baseUrl}/api/course/${selectedCourse._id}`,
+                              selectedCourse
                             );
-
-                            try {
-                              setUpdateLoading(true)
-                              const res = await axios.put(
-                                `${baseUrl}/api/course/${selectedCourse._id}`,
-                                selectedCourse
+                            if (res.status === 200) {
+                              setCourses((prev) =>
+                                prev.map((c) =>
+                                  c._id === selectedCourse._id
+                                    ? res.data.course
+                                    : c
+                                )
                               );
-
-                              if (res.status === 200) {
-                                // sync with backend response (maybe backend changes something)
-                                setCourses((prev) =>
-                                  prev.map((c) =>
-                                    c._id === selectedCourse._id ? res.data.course : c
-                                  )
-                                );
-                                toast.success("Course updated successfully!");
-                                setUpdateOpen(false)
-                              } else {
-                                // rollback if unexpected response
-                                setCourses(prevCourses);
-                                toast.error("Update failed (server error)");
-                                setUpdateOpen(false)
-
-                              }
-                            } catch (error) {
-                              console.error(error);
-                              // rollback if request fails
+                              toast.success("Course updated successfully!");
+                              setUpdateOpen(false);
+                            } else {
                               setCourses(prevCourses);
-                              toast.error("Failed to update course");
-                              setUpdateOpen(false)
-
-
-                            }finally{
-                              setUpdateLoading(false)
+                              toast.error("Update failed (server error)");
+                              setUpdateOpen(false);
                             }
-                          }}
-                        >
-                         {updateLoading ? <>
-                         <div className="w-3 h-3 border rounded-full border-t-sky-500 animate-spin"></div>Updating...</>:" Update Changes"}
-                        </Button>
-
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Delete */}
-                  <Dialog >
-                    <DialogTrigger asChild>
-                      <Button variant="destructive" className="flex items-center">
-                        <Trash className="h-4 w-4 mr-2" />
-                        Delete
+                          } catch (error) {
+                            console.error(error);
+                            setCourses(prevCourses);
+                            toast.error("Failed to update course");
+                            setUpdateOpen(false);
+                          } finally {
+                            setUpdateLoading(false);
+                          }
+                        }}
+                      >
+                        {updateLoading ? (
+                          <>
+                            <div className="w-3 h-3 border rounded-full border-t-sky-500 animate-spin"></div>
+                            Updating...
+                          </>
+                        ) : (
+                          "Update Changes"
+                        )}
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold text-red-600">
-                          Delete Course
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="py-4 text-sm text-muted-foreground">
-                        Are you sure you want to delete{" "}
-                        <span className="font-medium">{course.name}</span>?
-                        This action cannot be undone.
-                      </div>
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="outline" >
-                            Cancel
-                          </Button>
-                        </DialogClose>
-                        {/* <Button variant="outline" onClick={() => setOpen(false)}>
-                          Cancel
-                        </Button> */}
-                        <Button
-                          variant="destructive"
-                          onClick={() => {
-                            deleteCourses(course._id);
-                            setOpen(false);
-                          }}
-                        >
-                          Yes, Delete
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
-              </CardContent>
-            </Card>
-          ))}
-        </div>}
+                {/* Delete Course */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="destructive" className="flex items-center">
+                      <Trash className="h-4 w-4 mr-2" />
+                      Delete
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-semibold text-red-600">
+                        Delete Course
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4 text-sm text-gray-600">
+                      Are you sure you want to delete{" "}
+                      <span className="font-medium">{course.name}</span>? This
+                      action cannot be undone.
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          deleteCourses(course._id);
+                          setOpen(false);
+                        }}
+                      >
+                        Yes, Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+
     </div>
   );
 }
