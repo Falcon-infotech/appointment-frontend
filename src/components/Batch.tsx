@@ -44,6 +44,8 @@ const Batch = () => {
         fromDate?: string;
         toDate?: string;
     }
+    const [editingId, setEditingId] = useState<string | null>(null);
+
 
 
 
@@ -53,6 +55,7 @@ const Batch = () => {
                 setLoading(true)
                 const response = await api.get(`${baseUrl}/api/batch/all`)
                 const data = response.data.batches
+                console.log(data)
                 setBatch(data || [])
             } catch (error) {
                 console.error(error)
@@ -91,7 +94,7 @@ const Batch = () => {
         try {
             const response = await api.get(`${baseUrl}/api/course/all`)
             const data = response.data
-            console.log(data.courses)
+            // console.log(data.courses)
             setCourses(data.courses)
         } catch (error) {
             console.error(error);
@@ -151,59 +154,67 @@ const Batch = () => {
 
 
     const validateForm = (): boolean => {
-    let err: ValidationErrors = {};
+        let err: ValidationErrors = {};
 
-    if (!formData.batch) err.batch = "Batch is required";
-    if (!formData.batchName.trim()) err.batchName = "Batch name is required";
-    if (!formData.course) err.course = "Course is required";
-    if (!formData.instructorName) err.instructorName = "Instructor is required";
-    if (!formData.startDate) err.startDate = "Start date is required";
-    if (!formData.endDate) err.endDate = "End date is required";
-    else if (formData.startDate && formData.endDate < formData.startDate) {
-      err.endDate = "End date cannot be before start date";
-    }
-    if (!formData.branchName) err.branchName = "Branch is required";
+        if (!formData.batch) err.batch = "Batch is required";
+        if (!formData.batchName.trim()) err.batchName = "Batch name is required";
+        if (!formData.course) err.course = "Course is required";
+        if (!formData.instructorName) err.instructorName = "Instructor is required";
+        if (!formData.startDate) err.startDate = "Start date is required";
+        if (!formData.endDate) err.endDate = "End date is required";
+        else if (formData.startDate && formData.endDate < formData.startDate) {
+            err.endDate = "End date cannot be before start date";
+        }
+        if (!formData.branchName) err.branchName = "Branch is required";
 
-    setErrors(err)
+        setErrors(err)
 
-    return Object.values(err).length === 0;
-  };
+        return Object.values(err).length === 0;
+    };
+
+     const handleDelete = async (id: string) => {
+            try {
+                await api.delete(`/api/batch/${id}`);
+                // fetchBatches();
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
 
     const handleSubmit = async () => {
-    if (!validateForm()) {
-      return
-    }
+        if (!validateForm()) {
+            return
+        }
+        try {
+            const payload = {
+                "branchId": formData.branchName,
+                "courseId": formData.course,
+                "fromDate": formData.startDate,
+                "toDate": formData.endDate,
+                "code": formData.batch,
+                "inspectorId": formData.instructorName,
+                "name": formData.batchName,
+            }
+            const result = await api.post(`${baseUrl}/api/batch/bookBatch`, payload)
+            if (result.status === 201) {
+                toast.success("Batch Scheduled Successfully");
+                setFormData({
+                    batch: "",
+                    batchName: "",
+                    branchName: "",
+                    course: "",
+                    endDate: "",
+                    instructorName: "",
+                    startDate: ""
+                })
 
-    try {
-      const payload = {
-        "branchId": formData.branchName,
-        "courseId": formData.course,
-        "fromDate": formData.startDate,
-        "toDate": formData.endDate,
-        "code": formData.batch,
-        "inspectorId": formData.instructorName,
-        "name": formData.batchName,
-      }
-      const result = await api.post(`${baseUrl}/api/batch/bookBatch`, payload)
-      if (result.status === 201) {
-        toast.success("Batch Scheduled Successfully");
-        setFormData({
-            batch:"",
-            batchName:"",
-            branchName:"",
-            course:"",
-            endDate:"",
-            instructorName:"",
-            startDate:""
-        })
-
-      }
-    } catch (error) {
-      console.error(error)
-      toast.error("something happen while creating batch")
-    }
-  };
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error("something happen while creating batch")
+        }
+    };
 
     return (
         <div>
@@ -230,6 +241,7 @@ const Batch = () => {
                                 <TableHead>Branch</TableHead>
                                 <TableHead>Inspector</TableHead>
                                 <TableHead>Email</TableHead>
+                                <TableHead>Course</TableHead>
                                 <TableHead>Phone</TableHead>
                                 <TableHead>From</TableHead>
                                 <TableHead>To</TableHead>
@@ -244,6 +256,7 @@ const Batch = () => {
                                     <TableCell>{b.branchId?.branchName}</TableCell>
                                     <TableCell>{b.inspectorId?.name}</TableCell>
                                     <TableCell>{b.inspectorId?.email}</TableCell>
+                                    <TableCell>{b.courseId?.name}</TableCell>
                                     <TableCell>{b.inspectorId?.phone}</TableCell>
                                     <TableCell>
                                         {new Date(b.fromDate).toLocaleDateString("en-GB", {
@@ -283,6 +296,19 @@ const Batch = () => {
                                                     variant="outline"
                                                     size="sm"
                                                     className="flex items-center gap-1"
+                                                    onClick={() => {
+                                                        setFormData({
+                                                            batch: b.code || "",
+                                                            batchName: b.name || "",
+                                                            branchName: b.branchId?._id || "",
+                                                            course: b.course?._id || "",
+                                                            startDate: b.fromDate?.split("T")[0] || "",
+                                                            endDate: b.toDate?.split("T")[0] || "",
+                                                            instructorName: b.inspectorId?._id || "",
+                                                        });
+                                                        setEditingId(b._id);
+                                                    }}
+
                                                 >
                                                     <Edit className="h-4 w-4" /> Edit
                                                 </Button>
@@ -503,7 +529,7 @@ const Batch = () => {
                                                     <Button
                                                         variant="destructive"
                                                         onClick={() => {
-                                                            // handleDelete(b._id)
+                                                            handleDelete(b._id)
                                                         }}
                                                     >
                                                         Yes, Delete
