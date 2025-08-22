@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -32,12 +33,36 @@ type Instructor = {
 };
 
 const Instructor = () => {
-  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [instructors, setInstructors] = useState([]);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [loading, setLoading] = useState<boolean>(false)
   const [open, setOpen] = useState<boolean>(false)
   const [err, setErr] = useState<Record<string, string>>({});
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<any | null>(null);
+
+  const [drawer, setDrawer] = useState<Boolean>(false)
+  const [loadingInstructer, setLoadingInstructer] = useState(false);
+  const [inspectorById, setInstructorById] = useState(null)
+
+
+  const handleRowClick = (id: any) => {
+    setDrawer(true);
+    getById(id);
+  };
+
+
+  const getById = async (id: string) => {
+    try {
+      setLoadingInstructer(true);
+      setInstructorById(null);
+      const response = await api.get(`${baseUrl}/api/inspector/${id}`);
+      setInstructorById(response.data.inspector);
+    } catch (error) {
+      console.error("Error fetching branch:", error);
+    } finally {
+      setLoadingInstructer(false);
+    }
+  };
 
 
   useEffect(() => {
@@ -224,15 +249,15 @@ const Instructor = () => {
       {/* Table Section */}
       {loading ? (
         // Spinner
-       <div className="flex justify-center items-center h-40">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex justify-center items-center h-40">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-        ) : instructors.length === 0 ? (
+      ) : instructors.length === 0 ? (
         // Empty state
         <div className="text-center text-sky-500 py-6">
           No Instructors Found
         </div>
-        ) : (
+      ) : (
         // Table
         <div className="overflow-x-auto rounded-lg border shadow-sm">
           <Table>
@@ -246,7 +271,9 @@ const Instructor = () => {
             </TableHeader>
             <TableBody>
               {instructors.map((inst) => (
-                <TableRow key={inst._id} className="hover:bg-gray-50">
+                <TableRow key={inst._id} className="hover:bg-gray-50" onClick={() => {
+                  handleRowClick(inst._id)
+                }}>
                   <TableCell className="font-medium">{inst.name}</TableCell>
                   <TableCell>{inst.email}</TableCell>
                   <TableCell>{inst.phone}</TableCell>
@@ -255,7 +282,8 @@ const Instructor = () => {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
                         setForm({
                           email: inst.email,
                           name: inst.name,
@@ -268,15 +296,6 @@ const Instructor = () => {
                     >
                       <Edit className="h-4 w-4" /> Edit
                     </Button>
-                    {/* <Button
-                      variant="destructive"
-                      size="sm"
-                      className="flex items-center gap-1"
-                      onClick={() => handleDelete(inst?._id)}
-                    >
-                      <Trash2 className="h-4 w-4" /> Delete
-                    </Button> */}
-
                     <Dialog >
                       <DialogTrigger asChild>
                         <Button variant="destructive" className="flex items-center">
@@ -323,6 +342,134 @@ const Instructor = () => {
           </Table>
         </div>
       )}
+
+      <Dialog open={drawer} onOpenChange={setDrawer}>
+        <DialogContent className="sm:max-w-[750px] rounded-2xl shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-gray-800">
+              {loadingInstructer ? "Loading inspector..." : inspectorById?.name}
+            </DialogTitle>
+            <DialogDescription className="text-gray-500">
+              {loadingInstructer
+                ? "Fetching inspector details..."
+                : "Here are the complete details of the selected inspector."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingInstructer ? (
+            <div className="flex justify-center items-center h-48">
+              <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : inspectorById ? (
+            <div className="space-y-6">
+              {/* Inspector Info */}
+              <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border">
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Name
+                  </p>
+                  <p className="text-base font-semibold text-gray-800">
+                    {inspectorById?.name}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Email
+                  </p>
+                  <p className="text-base font-semibold text-gray-800">
+                    {inspectorById?.email}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Phone
+                  </p>
+                  <p className="text-base font-semibold text-gray-800">
+                    {inspectorById?.phone}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Total Batches
+                  </p>
+                  <p className="text-base font-semibold text-gray-800">
+                    {inspectorById?.totalBatches}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Created At
+                  </p>
+                  <p className="text-sm font-medium text-green-700">
+                    {new Date(inspectorById?.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Updated At
+                  </p>
+                  <p className="text-sm font-medium text-blue-700">
+                    {new Date(inspectorById?.updatedAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Courses */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  Assigned Courses
+                </h3>
+                {inspectorById.courseIds?.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-1/4">Name</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="w-1/6 text-center">Duration</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {inspectorById.courseIds.map((course, idx) => (
+                        <TableRow
+                          key={course._id}
+                          className={idx % 2 === 0 ? "bg-gray-50" : ""}
+                        >
+                          <TableCell className="font-medium text-gray-800">
+                            {course.name}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {course.description || "-"}
+                          </TableCell>
+                          <TableCell className="text-center text-gray-700">
+                            {course.duration ? `${course.duration} Days` : "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">
+                    No courses assigned to this inspector.
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-red-500 text-center py-6">
+              Failed to load inspector details.
+            </p>
+          )}
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="rounded-lg">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
     </div>
   );

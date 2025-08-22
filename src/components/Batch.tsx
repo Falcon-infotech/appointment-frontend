@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Button } from './ui/button'
 import { Edit, Group, PlusCircle, Trash } from 'lucide-react'
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 import api from '@/constants/axiosInstance'
 import { baseUrl } from '@/lib/base'
 import { Label } from './ui/label'
@@ -80,6 +80,30 @@ const Batch = () => {
         toDate: "",
     })
     const [errors, setErrors] = useState<ValidationErrors>({});
+
+    const [drawer, setDrawer] = useState<Boolean>(false)
+    const [loadingBatch, setLoadingBatch] = useState(false);
+    const [batchById, setBatchById] = useState(null)
+
+
+    const handleRowClick = (id: any) => {
+        setDrawer(true);
+        getById(id);
+    };
+
+
+    const getById = async (id: any) => {
+        try {
+            setLoadingBatch(true);
+            setBatchById(null);
+            const response = await api.get(`${baseUrl}/api/batch/${id}`);
+            setBatchById(response.data.batches);
+        } catch (error) {
+            console.error("Error fetching branch:", error);
+        } finally {
+            setLoadingBatch(false);
+        }
+    };
 
     const fetchAllBranches = async () => {
 
@@ -287,7 +311,13 @@ const Batch = () => {
                         </TableHeader>
                         <TableBody>
                             {batch.map((b) => (
-                                <TableRow key={b._id} className="hover:bg-gray-50">
+                                <TableRow key={b._id} className="hover:bg-gray-50" onClick={(e) => {
+                                    // prevent firing row click if clicked inside action buttons
+                                    const isInsideActions = e.target.closest("button, [role='dialog']");
+                                    if (isInsideActions) return;
+
+                                    handleRowClick(b._id);
+                                }}>
                                     <TableCell className="font-medium">{b.name}</TableCell>
                                     <TableCell>{b.code}</TableCell>
                                     <TableCell>{b.branchId?.branchName}</TableCell>
@@ -317,7 +347,8 @@ const Batch = () => {
                                                     variant="outline"
                                                     size="sm"
                                                     className="flex items-center gap-1"
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
                                                         setFormData({
                                                             batch: b.code || "",
                                                             batchName: b.name || "",
@@ -538,6 +569,133 @@ const Batch = () => {
                     </Table>
                 </div>
             )}
+
+            <Dialog open={drawer} onOpenChange={setDrawer}>
+                <DialogContent className="sm:max-w-[750px] rounded-2xl shadow-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold text-gray-800">
+                            {loadingBatch ? "Loading inspector..." : batchById?.name}
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-500">
+                            {loadingBatch
+                                ? "Fetching inspector details..."
+                                : "Here are the complete details of the selected inspector."}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {loadingBatch ? (
+                        <div className="flex justify-center items-center h-48">
+                            <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : batchById ? (
+                        <div className="space-y-6">
+                            {/* Inspector Info */}
+                            <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border">
+                                <div>
+                                    <p className="text-xs uppercase text-gray-500 tracking-wide">
+                                        Name
+                                    </p>
+                                    <p className="text-base font-semibold text-gray-800">
+                                        {batchById?.name}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase text-gray-500 tracking-wide">
+                                        Email
+                                    </p>
+                                    <p className="text-base font-semibold text-gray-800">
+                                        {batchById?.email}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase text-gray-500 tracking-wide">
+                                        Phone
+                                    </p>
+                                    <p className="text-base font-semibold text-gray-800">
+                                        {batchById?.phone}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase text-gray-500 tracking-wide">
+                                        Total Batches
+                                    </p>
+                                    <p className="text-base font-semibold text-gray-800">
+                                        {batchById?.totalBatches}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase text-gray-500 tracking-wide">
+                                        Created At
+                                    </p>
+                                    <p className="text-sm font-medium text-green-700">
+                                        {new Date(batchById?.createdAt).toLocaleString()}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase text-gray-500 tracking-wide">
+                                        Updated At
+                                    </p>
+                                    <p className="text-sm font-medium text-blue-700">
+                                        {new Date(batchById?.updatedAt).toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Courses */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                                    Assigned Courses
+                                </h3>
+                                {batchById.courseIds?.length > 0 ? (
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-1/4">Name</TableHead>
+                                                <TableHead>Description</TableHead>
+                                                <TableHead className="w-1/6 text-center">Duration</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {batchById.courseIds.map((course, idx) => (
+                                                <TableRow
+                                                    key={course._id}
+                                                    className={idx % 2 === 0 ? "bg-gray-50" : ""}
+                                                >
+                                                    <TableCell className="font-medium text-gray-800">
+                                                        {course.name}
+                                                    </TableCell>
+                                                    <TableCell className="text-gray-600">
+                                                        {course.description || "-"}
+                                                    </TableCell>
+                                                    <TableCell className="text-center text-gray-700">
+                                                        {course.duration ? `${course.duration} Days` : "-"}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                ) : (
+                                    <p className="text-sm text-gray-500 italic">
+                                        No courses assigned to this inspector.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-sm text-red-500 text-center py-6">
+                            Failed to load inspector details.
+                        </p>
+                    )}
+
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="outline" className="rounded-lg">
+                                Close
+                            </Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
 
     )

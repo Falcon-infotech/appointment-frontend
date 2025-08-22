@@ -1,11 +1,9 @@
 import {
-  Calendar,
   HomeIcon,
   Building,
   Book,
   BarChartHorizontalBig,
   Users,
-  Settings,
   LayoutDashboard,
   PlusCircle,
 } from "lucide-react";
@@ -70,7 +68,7 @@ export function AppSidebar() {
     toDate?: string;
   }
 
-  const [branches, setBranches] = useState([])
+  const [branches, setBranches] = useState<any>([])
   const [courses, setCourses] = useState([]);
   const [instructer, setInstructer] = useState([])
   const [err, setErr] = useState<Error>({
@@ -340,7 +338,7 @@ export function AppSidebar() {
                           <SelectValue placeholder="Select Branch Name" />
                         </SelectTrigger>
                         <SelectContent>
-                          {branches?.map((b) => (
+                          {branches?.map((b:any) => (
                             <SelectItem key={b._id} value={b._id}>
                               {b.branchName}
                             </SelectItem>
@@ -361,7 +359,7 @@ export function AppSidebar() {
                           <SelectValue placeholder="Select Course" />
                         </SelectTrigger>
                         <SelectContent>
-                          {courses?.map((c) => (
+                          {courses?.map((c:any) => (
                             <SelectItem key={c._id} value={c._id}>
                               {c.name}
                             </SelectItem>
@@ -422,7 +420,7 @@ export function AppSidebar() {
                           {instructer?.length === 0 ? (
                             <p className="text-gray-500 px-2 py-1">No Instructor available</p>
                           ) : (
-                            instructer?.map((b) => (
+                            instructer?.map((b:any) => (
                               <SelectItem key={b._id} value={b._id}>
                                 {b.name}
                               </SelectItem>
