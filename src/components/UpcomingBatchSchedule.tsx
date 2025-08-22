@@ -1,4 +1,5 @@
 import { Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Batch {
   id: number;
@@ -37,7 +38,10 @@ export default function UpcomingBatchSchedule() {
           Upcoming Batch Schedule
         </h2>
         <button className="text-sm text-blue-600 hover:underline">
-          View All
+          <Link to={"/batches"}>
+                
+                View All
+                </Link>
         </button>
       </div>
 

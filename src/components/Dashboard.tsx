@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Users, DollarSign, Building, Award, BarChart3
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -385,14 +385,17 @@ export function DashboardArea() {
                 Instructors
               </h2>
               <button className="text-sm text-blue-600 hover:underline">
+                <Link to={"/instructor"}>
+                
                 View All
+                </Link>
               </button>
             </div>
 
             {/* Instructor Cards */}
             <div className="space-y-3">
               {instructors.length > 0 ? (
-                instructors.map((inst) => (
+                instructors.slice(0,3).map((inst) => (
                   <div
                     key={inst._id}
                     className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition cursor-pointer"
