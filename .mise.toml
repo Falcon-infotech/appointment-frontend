@@ -1,0 +1,7 @@
+[tools]
+node = "22.18.0"
+npm = "10.9.3"
+
+[env]
+# Optional: if you want to set Vite port or other env variables
+VITE_PORT = "5173"
