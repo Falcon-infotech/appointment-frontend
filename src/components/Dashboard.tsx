@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, Users, DollarSign, Building, Award, BarChart3, PieChart, PlusCircle, EyeOff, Eye, LayoutDashboard } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, DollarSign, Building, Award, BarChart3, PieChart, PlusCircle, EyeOff, Eye, LayoutDashboard, Mail, Phone } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +14,7 @@ import EnhancedTable from "./Table";
 import { baseUrl } from "@/lib/base";
 import api from "../constants/axiosInstance";
 import DashboardMetrics from "./DashboardMetrics ";
+import UpcomingBatchSchedule from "./UpcomingBatchSchedule";
 interface Company {
   id: string;
   name: string;
@@ -35,7 +36,12 @@ interface MetricCard {
   icon: React.ReactNode;
   color: string;
 }
-
+type Instructor = {
+  _id?: string | number;  
+  name: string;
+  email: string;
+  phone: number;
+};
 
 
 
@@ -47,6 +53,7 @@ export function DashboardArea() {
 
   const [dashboardData, setDashboardData] = useState([])
   const [loading, setLoading] = useState(false)
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -68,6 +75,7 @@ export function DashboardArea() {
     try {
       const response = await api.get(`${baseUrl}/api/batch/all`);
       const data = response.data;
+      console.log(data)
       setDashboardData(data.batches || []);
       setTotals({
         totalBatches: data.totalBatches,
@@ -81,6 +89,23 @@ export function DashboardArea() {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`${baseUrl}/api/inspector/all`);
+        const data = res.data?.inspectors;
+        console.log(data)
+        setInstructors(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstructors();
+  }, []);
 
   useEffect(() => {
     fetchBatches(true);
@@ -297,11 +322,13 @@ export function DashboardArea() {
         ))}
       </div> */}
       <DashboardMetrics totals={totals} />
+      <EnhancedTable />
+
 
       {/* Charts and Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Department Distribution */}
-        <Card className="bg-gradient-card border-0 shadow-sm">
+        {/* <Card className="bg-gradient-card border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
@@ -309,7 +336,7 @@ export function DashboardArea() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* <div className="space-y-4">
+            <div className="space-y-4">
               {departmentData.map((dept, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -319,16 +346,17 @@ export function DashboardArea() {
                   <Progress value={dept.percentage} className="h-2" />
                 </div>
               ))}
-            </div> */}
+            </div>
 
-            <div>
+            <div className="space-y-4">
               
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
+        <UpcomingBatchSchedule />
 
         {/* Revenue Trend */}
-        <Card className="bg-gradient-card border-0 shadow-sm">
+        {/* <Card className="bg-gradient-card border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
@@ -348,11 +376,52 @@ export function DashboardArea() {
               ))}
             </div>
           </CardContent>
-        </Card>
-      </div>
-      <EnhancedTable />
+        </Card> */}
+        <div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Instructors
+              </h2>
+              <button className="text-sm text-blue-600 hover:underline">
+                View All
+              </button>
+            </div>
 
-      {/* Additional Info Cards */}
+            {/* Instructor Cards */}
+            <div className="space-y-3">
+              {instructors.length > 0 ? (
+                instructors.map((inst) => (
+                  <div
+                    key={inst._id}
+                    className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition cursor-pointer"
+                  >
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-800">
+                        {inst.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 flex items-center">
+                        <Mail className="w-3 h-3 mr-1" />
+                        {inst.email}
+                      </p>
+                      <p className="text-xs text-gray-500 flex items-center">
+                        <Phone className="w-3 h-3 mr-1" />
+                        {inst.phone}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No instructors found.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
 
     </div>
   );

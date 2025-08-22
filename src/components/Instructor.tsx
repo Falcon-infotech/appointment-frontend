@@ -26,14 +26,14 @@ import { baseUrl } from "@/lib/base";
 import toast from "react-hot-toast";
 
 type Instructor = {
-  _id?: number;
+  _id?: string | number;  
   name: string;
   email: string;
-  phone: string;
+  phone: number;
 };
 
 const Instructor = () => {
-  const [instructors, setInstructors] = useState<any>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [loading, setLoading] = useState<boolean>(false)
   const [open, setOpen] = useState<boolean>(false)
@@ -42,7 +42,12 @@ const Instructor = () => {
 
   const [drawer, setDrawer] = useState<Boolean>(false)
   const [loadingInstructer, setLoadingInstructer] = useState(false);
-  const [inspectorById, setInstructorById] = useState<any>(null)
+  const [inspectorById, setInstructorById] = useState<Instructor>({
+    email:"",
+    name:"",
+    phone:0,
+    _id:""
+  })
 
 
   const handleRowClick = (id: any) => {
@@ -54,7 +59,12 @@ const Instructor = () => {
   const getById = async (id: string) => {
     try {
       setLoadingInstructer(true);
-      setInstructorById(null);
+      setInstructorById({
+        email:"",
+        name:"",
+        phone:0,
+        _id:""
+      });
       const response = await api.get(`${baseUrl}/api/inspector/${id}`);
       setInstructorById(response.data.inspector);
     } catch (error) {
@@ -118,7 +128,7 @@ const Instructor = () => {
 
 
       setInstructors(
-        instructors.map((inst:any) =>
+        instructors.map((inst) =>
           inst._id === editingId
             ? { ...inst, ...form, phone: Number(form.phone) }
             : inst
@@ -153,8 +163,8 @@ const Instructor = () => {
           // Replace tempId with real backend _id
           const created = res.data?.inspector;
           if (created?._id) {
-            setInstructors((curr:any) =>
-              curr.map((inst:any) =>
+            setInstructors((curr) =>
+              curr.map((inst) =>
                 inst._id === tempId ? { ...created } : inst
               )
             );
@@ -177,7 +187,7 @@ const Instructor = () => {
   const handleDelete = async (id: string) => {
     const prevInstructors = [...instructors];
 
-    setInstructors(instructors.filter((inst:any) => inst._id !== id));
+    setInstructors(instructors.filter((inst) => inst._id !== id));
 
     try {
       const res = await api.delete(`${baseUrl}/api/inspector/${id}`);
@@ -270,7 +280,7 @@ const Instructor = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {instructors.map((inst:any) => (
+              {instructors.map((inst) => (
                 <TableRow key={inst._id} className="hover:bg-gray-50" onClick={() => {
                   handleRowClick(inst._id)
                 }}>
