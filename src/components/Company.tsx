@@ -431,14 +431,23 @@ export default function Company() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-1"
                         onClick={(e) => {
-                          e.stopPropagation(); // prevent row modal
-                          // edit logic
+                          e.stopPropagation();
+                          setNewCompany({
+                            address: branch.address,
+                            branchCode: branch.branchCode,
+                            branchName: branch.branchName,
+                            country: branch.country,
+                            courseIds: branch.courseIds,
+                          });
+                          setEditingBranchId(branch._id);
+                          setIsEditMode(true);
+                          setIsAddDialogOpen(true); 
                         }}
                       >
                         <Edit className="h-4 w-4" /> Edit
                       </Button>
+
                       <Button
                         variant="destructive"
                         size="sm"
@@ -459,124 +468,124 @@ export default function Company() {
       </div>
 
       {/* Modal */}
-     <Dialog open={drawer} onOpenChange={setDrawer}>
-  <DialogContent className="sm:max-w-[750px] rounded-2xl shadow-2xl">
-    <DialogHeader>
-      <DialogTitle className="text-2xl font-bold text-gray-800">
-        {loadingBranch ? "Loading branch..." : branchById?.branchName}
-      </DialogTitle>
-      <DialogDescription className="text-gray-500">
-        {loadingBranch
-          ? "Fetching details..."
-          : "Here are the complete details of the selected branch."}
-      </DialogDescription>
-    </DialogHeader>
+      <Dialog open={drawer} onOpenChange={setDrawer}>
+        <DialogContent className="sm:max-w-[750px] rounded-2xl shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-gray-800">
+              {loadingBranch ? "Loading branch..." : branchById?.branchName}
+            </DialogTitle>
+            <DialogDescription className="text-gray-500">
+              {loadingBranch
+                ? "Fetching details..."
+                : "Here are the complete details of the selected branch."}
+            </DialogDescription>
+          </DialogHeader>
 
-    {loadingBranch ? (
-      <div className="flex justify-center items-center h-48">
-        <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    ) : branchById ? (
-      <div className="space-y-6">
-        {/* Branch Info */}
-        <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border">
-          <div>
-            <p className="text-xs uppercase text-gray-500 tracking-wide">
-              Country
-            </p>
-            <p className="text-base font-semibold text-gray-800">
-              {branchById.country}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-gray-500 tracking-wide">
-              Branch Code
-            </p>
-            <p className="text-base font-semibold text-gray-800">
-              {branchById.branchCode}
-            </p>
-          </div>
-          <div className="col-span-2">
-            <p className="text-xs uppercase text-gray-500 tracking-wide">
-              Address
-            </p>
-            <p className="text-base font-semibold text-gray-800">
-              {branchById.address}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-gray-500 tracking-wide">
-              Created At
-            </p>
-            <p className="text-sm font-medium text-green-700">
-              {new Date(branchById.createdAt).toLocaleString()}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-gray-500 tracking-wide">
-              Updated At
-            </p>
-            <p className="text-sm font-medium text-blue-700">
-              {new Date(branchById.updatedAt).toLocaleString()}
-            </p>
-          </div>
-        </div>
+          {loadingBranch ? (
+            <div className="flex justify-center items-center h-48">
+              <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : branchById ? (
+            <div className="space-y-6">
+              {/* Branch Info */}
+              <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border">
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Country
+                  </p>
+                  <p className="text-base font-semibold text-gray-800">
+                    {branchById.country}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Branch Code
+                  </p>
+                  <p className="text-base font-semibold text-gray-800">
+                    {branchById.branchCode}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Address
+                  </p>
+                  <p className="text-base font-semibold text-gray-800">
+                    {branchById.address}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Created At
+                  </p>
+                  <p className="text-sm font-medium text-green-700">
+                    {new Date(branchById.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-gray-500 tracking-wide">
+                    Updated At
+                  </p>
+                  <p className="text-sm font-medium text-blue-700">
+                    {new Date(branchById.updatedAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
 
-        {/* Courses */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">
-            Assigned Courses
-          </h3>
-          {branchById.courseIds?.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-1/4">Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="w-1/6 text-center">Duration</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {branchById.courseIds.map((course, idx) => (
-                  <TableRow
-                    key={course._id}
-                    className={idx % 2 === 0 ? "bg-gray-50" : ""}
-                  >
-                    <TableCell className="font-medium text-gray-800">
-                      {course.name}
-                    </TableCell>
-                    <TableCell className="text-gray-600">
-                      {course.description || "-"}
-                    </TableCell>
-                    <TableCell className="text-center text-gray-700">
-                      {course.duration ? `${course.duration} Days` : "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+              {/* Courses */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  Assigned Courses
+                </h3>
+                {branchById.courseIds?.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-1/4">Name</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="w-1/6 text-center">Duration</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {branchById.courseIds.map((course, idx) => (
+                        <TableRow
+                          key={course._id}
+                          className={idx % 2 === 0 ? "bg-gray-50" : ""}
+                        >
+                          <TableCell className="font-medium text-gray-800">
+                            {course.name}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {course.description || "-"}
+                          </TableCell>
+                          <TableCell className="text-center text-gray-700">
+                            {course.duration ? `${course.duration} Days` : "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">
+                    No courses assigned to this branch.
+                  </p>
+                )}
+              </div>
+            </div>
           ) : (
-            <p className="text-sm text-gray-500 italic">
-              No courses assigned to this branch.
+            <p className="text-sm text-red-500 text-center py-6">
+              Failed to load branch details.
             </p>
           )}
-        </div>
-      </div>
-    ) : (
-      <p className="text-sm text-red-500 text-center py-6">
-        Failed to load branch details.
-      </p>
-    )}
 
-    <DialogFooter>
-      <DialogClose asChild>
-        <Button variant="outline" className="rounded-lg">
-          Close
-        </Button>
-      </DialogClose>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="rounded-lg">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );

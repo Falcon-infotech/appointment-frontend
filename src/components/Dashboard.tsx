@@ -10,9 +10,10 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import axios from "../constants/axiosInstance";
 import toast from "react-hot-toast";
-import CoursesSection from "./CourseSection";
 import EnhancedTable from "./Table";
 import { baseUrl } from "@/lib/base";
+import api from "../constants/axiosInstance";
+import DashboardMetrics from "./DashboardMetrics ";
 interface Company {
   id: string;
   name: string;
@@ -44,6 +45,9 @@ export function DashboardArea() {
   const [showPassword, setShowPassword] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const [dashboardData, setDashboardData] = useState([])
+  const [loading, setLoading] = useState(false)
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -52,6 +56,37 @@ export function DashboardArea() {
     phone: "+91",
   });
 
+  const [totals, setTotals] = useState({
+    totalBatches: 0,
+    totalInspectors: 0,
+    totalCourses: 0,
+    totalBranches: 0,
+  });
+
+  const fetchBatches = async (flag: boolean) => {
+    if (flag) setLoading(true);
+    try {
+      const response = await api.get(`${baseUrl}/api/batch/all`);
+      const data = response.data;
+      setDashboardData(data.batches || []);
+      setTotals({
+        totalBatches: data.totalBatches,
+        totalInspectors: data.totalInspectors,
+        totalCourses: data.totalCourses,
+        totalBranches: data.totalBranches,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBatches(true);
+  }, []);
+
+
 
   const handlechange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,123 +94,85 @@ export function DashboardArea() {
   }
 
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    const payload = {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      email: formData.email,
-      password: formData.password,
-      phone: formData.phone
-    };
+    try {
+      const payload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone
+      };
 
-    const response = await axios.post(`${baseUrl}/api/auth/register`, payload);
+      const response = await axios.post(`${baseUrl}/api/auth/register`, payload);
 
-    if (response.status === 200 || response.status === 201) {
-      toast.success("User created successfully",{
-        duration: 3000,
-      });
+      if (response.status === 200 || response.status === 201) {
+        toast.success("User created successfully", {
+          duration: 3000,
+        });
 
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        phone: "+91",
-      });
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          password: "",
+          phone: "+91",
+        });
 
-      setOpen(false); 
-    } else {
-      toast.error("Failed to add user");
+        setOpen(false);
+      } else {
+        toast.error("Failed to add user");
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error(error?.response?.data?.message || "Something went wrong");
     }
-  } catch (error: any) {
-    console.error("Error:", error);
-    toast.error(error?.response?.data?.message || "Something went wrong");
-  }
 
-  console.log("Form submitted with data:", formData);
-};
+    console.log("Form submitted with data:", formData);
+  };
 
 
   useEffect(() => {
-    if (selectedCompany) {
-      // Generate metrics based on selected company
-      const companyMetrics: MetricCard[] = [
-        {
-          title: "Total Revenue",
-          value: selectedCompany.revenue,
-          change: "+12.5%",
-          trend: "up",
-          icon: <DollarSign className="h-5 w-5" />,
-          color: "red-500",
-        },
-        {
-          title: "Employees",
-          value: selectedCompany.employees.toString(),
-          change: "+8.2%",
-          trend: "up",
-          icon: <Users className="h-5 w-5" />,
-          color: "green-500",
-        },
-        {
-          title: "Growth Rate",
-          value: "23.4%",
-          change: "-2.1%",
-          trend: "down",
-          icon: <TrendingUp className="h-5 w-5" />,
-          color: "blue-500",
-        },
-        {
-          title: "Market Share",
-          value: "15.8%",
-          change: "+5.7%",
-          trend: "up",
-          icon: <PieChart className="h-5 w-5" />,
-          color: "sky-500",
-        },
-      ];
-      setMetrics(companyMetrics);
-    } else {
-      // Default overview metrics
-      const overviewMetrics: MetricCard[] = [
-        {
-          title: "Total Companies",
-          value: "24",
-          change: "+3 this month",
-          trend: "up",
-          icon: <Building className="h-5 w-5" />,
-          color: "red-500",
-        },
-        {
-          title: "Total Employees",
-          value: "1,450",
-          change: "+125 this quarter",
-          trend: "up",
-          icon: <Users className="h-5 w-5" />,
-          color: "green-500",
-        },
-        {
-          title: "Combined Revenue",
-          value: "$12.8M",
-          change: "+18.3%",
-          trend: "up",
-          icon: <DollarSign className="h-5 w-5" />,
-          color: "blue-500",
-        },
-        {
-          title: "Active Companies",
-          value: "22",
-          change: "91.7% active",
-          trend: "up",
-          icon: <Award className="h-5 w-5" />,
-          color: "sky-500",
-        },
-      ];
-      setMetrics(overviewMetrics);
-    }
-  }, [selectedCompany]);
+
+    const overviewMetrics: MetricCard[] = [
+      {
+        title: "Total Companies",
+        value: "24",
+        change: "+3 this month",
+        trend: "up",
+        icon: <Building className="h-5 w-5" />,
+        color: "red-500",
+      },
+      {
+        title: "Total Employees",
+        value: "1,450",
+        change: "+125 this quarter",
+        trend: "up",
+        icon: <Users className="h-5 w-5" />,
+        color: "green-500",
+      },
+      {
+        title: "Combined Revenue",
+        value: "$12.8M",
+        change: "+18.3%",
+        trend: "up",
+        icon: <DollarSign className="h-5 w-5" />,
+        color: "blue-500",
+      },
+      {
+        title: "Active Companies",
+        value: "22",
+        change: "91.7% active",
+        trend: "up",
+        icon: <Award className="h-5 w-5" />,
+        color: "sky-500",
+      },
+    ];
+    setMetrics(overviewMetrics);
+  }
+    , []);
 
   const departmentData = [
     { name: "Engineering", employees: 45, percentage: 35 },
@@ -199,10 +196,10 @@ export function DashboardArea() {
       {/* Header */}
       <div className="mb-8 flex justify-between">
         <div>
-         <div className="flex items-center gap-2 p-3 text-3xl">
-          <LayoutDashboard className="h-6 w-6 text-blue-600" />
-          <h2 className=" font-semibold">Dashboard</h2>
-        </div>
+          <div className="flex items-center gap-2 p-3 text-3xl">
+            <LayoutDashboard className="h-6 w-6 text-blue-600" />
+            <h2 className=" font-semibold">Dashboard</h2>
+          </div>
         </div>
         <div >
           <Dialog open={open} onOpenChange={setOpen}>
@@ -268,7 +265,7 @@ export function DashboardArea() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {metrics.map((metric, index) => (
           <Card key={index} className="bg-gradient-card border-0 shadow-lg hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -298,7 +295,8 @@ export function DashboardArea() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div> */}
+      <DashboardMetrics totals={totals} />
 
       {/* Charts and Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -307,7 +305,7 @@ export function DashboardArea() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              {selectedCompany ? "Department Distribution" : "Industry Distribution"}
+             Ucoming Batches
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -348,10 +346,10 @@ export function DashboardArea() {
           </CardContent>
         </Card>
       </div>
-        <EnhancedTable />
+      <EnhancedTable />
 
       {/* Additional Info Cards */}
-    
+
     </div>
   );
 }
