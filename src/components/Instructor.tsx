@@ -33,7 +33,7 @@ type Instructor = {
 };
 
 const Instructor = () => {
-  const [instructors, setInstructors] = useState([]);
+  const [instructors, setInstructors] = useState<any>([]);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [loading, setLoading] = useState<boolean>(false)
   const [open, setOpen] = useState<boolean>(false)
@@ -42,7 +42,7 @@ const Instructor = () => {
 
   const [drawer, setDrawer] = useState<Boolean>(false)
   const [loadingInstructer, setLoadingInstructer] = useState(false);
-  const [inspectorById, setInstructorById] = useState(null)
+  const [inspectorById, setInstructorById] = useState<any>(null)
 
 
   const handleRowClick = (id: any) => {
@@ -118,7 +118,7 @@ const Instructor = () => {
 
 
       setInstructors(
-        instructors.map((inst) =>
+        instructors.map((inst:any) =>
           inst._id === editingId
             ? { ...inst, ...form, phone: Number(form.phone) }
             : inst
@@ -153,8 +153,8 @@ const Instructor = () => {
           // Replace tempId with real backend _id
           const created = res.data?.inspector;
           if (created?._id) {
-            setInstructors((curr) =>
-              curr.map((inst) =>
+            setInstructors((curr:any) =>
+              curr.map((inst:any) =>
                 inst._id === tempId ? { ...created } : inst
               )
             );
@@ -177,7 +177,7 @@ const Instructor = () => {
   const handleDelete = async (id: string) => {
     const prevInstructors = [...instructors];
 
-    setInstructors(instructors.filter((inst) => inst._id !== id));
+    setInstructors(instructors.filter((inst:any) => inst._id !== id));
 
     try {
       const res = await api.delete(`${baseUrl}/api/inspector/${id}`);
@@ -270,7 +270,7 @@ const Instructor = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {instructors.map((inst) => (
+              {instructors.map((inst:any) => (
                 <TableRow key={inst._id} className="hover:bg-gray-50" onClick={() => {
                   handleRowClick(inst._id)
                 }}>

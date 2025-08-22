@@ -309,7 +309,7 @@ export function DashboardArea() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               {departmentData.map((dept, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -319,6 +319,10 @@ export function DashboardArea() {
                   <Progress value={dept.percentage} className="h-2" />
                 </div>
               ))}
+            </div> */}
+
+            <div>
+              
             </div>
           </CardContent>
         </Card>
@@ -328,7 +332,7 @@ export function DashboardArea() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              Revenue Trend
+              Instructer
             </CardTitle>
           </CardHeader>
           <CardContent>
