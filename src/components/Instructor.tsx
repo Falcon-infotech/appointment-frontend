@@ -308,7 +308,7 @@ const Instructor = () => {
                     </Button>
                     <Dialog >
                       <DialogTrigger asChild>
-                        <Button variant="destructive" className="flex items-center">
+                        <Button variant="destructive" className="flex items-center" onClick={(e) => e.stopPropagation()} >
                           <Trash className="h-4 w-4 mr-2" />
                           Delete
                         </Button>
@@ -335,7 +335,8 @@ const Instructor = () => {
                         </Button> */}
                           <Button
                             variant="destructive"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleDelete(inst?._id)
 
                             }}

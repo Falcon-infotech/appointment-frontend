@@ -45,7 +45,7 @@ export default function CourseDetails({ course }: { course: any }) {
       {/* Inspectors */}
       <Card className="shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Inspectors</CardTitle>
+          <CardTitle className="text-xl font-semibold">Instructors</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -68,7 +68,7 @@ export default function CourseDetails({ course }: { course: any }) {
           </Table>
         </CardContent>
       </Card>
-      <Card className="shadow-md">
+      {/* <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Inspectors</CardTitle>
         </CardHeader>
@@ -92,7 +92,7 @@ export default function CourseDetails({ course }: { course: any }) {
             </TableBody>
           </Table>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

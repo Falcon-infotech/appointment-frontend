@@ -34,6 +34,12 @@ const Login = () => {
         navigate("/home");
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('accessTokennew', response.data.accessToken);
+        localStorage.setItem("info",JSON.stringify({
+          name:response.data.user.first_name,
+          lastname:response.data.user.last_name,
+          phone:response.data.user.phone,
+          email:response.data.user.email
+        }))
       }
     } catch (error) {
       console.error("Login failed:", error);

@@ -37,7 +37,7 @@ interface MetricCard {
   color: string;
 }
 type Instructor = {
-  _id?: string | number;  
+  _id?: string | number;
   name: string;
   email: string;
   phone: number;
@@ -54,7 +54,7 @@ export function DashboardArea() {
   const [dashboardData, setDashboardData] = useState([])
   const [loading, setLoading] = useState(false)
   const [instructors, setInstructors] = useState<Instructor[]>([]);
-
+  const [instructorloading, setinsLoading] = useState(false)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -75,7 +75,7 @@ export function DashboardArea() {
     try {
       const response = await api.get(`${baseUrl}/api/batch/all`);
       const data = response.data;
-      console.log(data)
+      // console.log(data)
       setDashboardData(data.batches || []);
       setTotals({
         totalBatches: data.totalBatches,
@@ -92,15 +92,15 @@ export function DashboardArea() {
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
-        setLoading(true);
+        setinsLoading(true);
         const res = await api.get(`${baseUrl}/api/inspector/all`);
         const data = res.data?.inspectors;
-        console.log(data)
+        // console.log(data)
         setInstructors(data);
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false);
+        setinsLoading(false);
       }
     };
 
@@ -155,7 +155,6 @@ export function DashboardArea() {
       toast.error(error?.response?.data?.message || "Something went wrong");
     }
 
-    console.log("Form submitted with data:", formData);
   };
 
 
@@ -322,7 +321,7 @@ export function DashboardArea() {
         ))}
       </div> */}
       <DashboardMetrics totals={totals} />
-      <EnhancedTable />
+      <EnhancedTable data={dashboardData} />
 
 
       {/* Charts and Data */}
@@ -353,7 +352,7 @@ export function DashboardArea() {
             </div>
           </CardContent>
         </Card> */}
-        <UpcomingBatchSchedule />
+        <UpcomingBatchSchedule data={dashboardData} />
 
         {/* Revenue Trend */}
         {/* <Card className="bg-gradient-card border-0 shadow-sm">
@@ -386,39 +385,61 @@ export function DashboardArea() {
               </h2>
               <button className="text-sm text-blue-600 hover:underline">
                 <Link to={"/instructor"}>
-                
-                View All
+
+                  View All
                 </Link>
               </button>
             </div>
 
             {/* Instructor Cards */}
-            <div className="space-y-3">
-              {instructors.length > 0 ? (
-                instructors.slice(0,3).map((inst) => (
-                  <div
-                    key={inst._id}
-                    className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition cursor-pointer"
-                  >
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-800">
-                        {inst.name}
-                      </h3>
-                      <p className="text-xs text-gray-500 flex items-center">
-                        <Mail className="w-3 h-3 mr-1" />
-                        {inst.email}
-                      </p>
-                      <p className="text-xs text-gray-500 flex items-center">
-                        <Phone className="w-3 h-3 mr-1" />
-                        {inst.phone}
-                      </p>
+
+            {
+              instructorloading ? (
+
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="animate-pulse flex items-center justify-between bg-gray-100 rounded-xl p-4"
+                    >
+                      <div>
+                        <div className="h-3 w-24 bg-gray-300 rounded mb-2"></div>
+                        <div className="h-2 w-16 bg-gray-200 rounded"></div>
+                      </div>
+                      <div className="h-3 w-20 bg-gray-300 rounded"></div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </>
               ) : (
-                <p className="text-gray-500 text-sm">No instructors found.</p>
-              )}
-            </div>
+                <div className="space-y-3">
+                  {instructors.length > 0 ? (
+                    instructors.slice(0, 3).map((inst) => (
+                      <div
+                        key={inst._id}
+                        className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition cursor-pointer"
+                      >
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-800">
+                            {inst.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 flex items-center">
+                            <Mail className="w-3 h-3 mr-1" />
+                            {inst.email}
+                          </p>
+                          <p className="text-xs text-gray-500 flex items-center">
+                            <Phone className="w-3 h-3 mr-1" />
+                            {inst.phone}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">No instructors found.</p>
+                  )}
+                </div>
+              )
+            }
+
           </div>
         </div>
       </div>
