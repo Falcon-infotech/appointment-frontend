@@ -1,10 +1,17 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card} from "@/components/ui/card";
-import {  Mail, Pencil, Settings } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Mail, Pencil, Settings } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function ProfilePage() {
+  const [info, setInfo] = useState(() => {
+    const savedInfo = localStorage.getItem("info");
+    return savedInfo ? JSON.parse(savedInfo) : null;
+  });
+
   return (
     <div className="p-6 space-y-6">
       {/* Top Row */}
@@ -14,9 +21,11 @@ export default function ProfilePage() {
           <Button variant="outline" size="sm">
             <Pencil className="h-4 w-4 mr-1" /> Edit Profile
           </Button>
+         <Link to={"/settings"}>
           <Button variant="outline" size="sm">
             <Settings className="h-4 w-4 mr-1" /> Settings
           </Button>
+         </Link>
         </div>
       </div>
 
@@ -29,9 +38,9 @@ export default function ProfilePage() {
               <AvatarImage src="https://github.com/shadcn.png" alt="John Doe" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
-            <h2 className="mt-4 text-lg font-semibold">John Doe</h2>
-            <p className="text-sm text-gray-500">Product Designer</p>
-            <Badge variant="secondary" className="mt-1">Pro Member</Badge>
+            <h2 className="mt-4 text-lg font-semibold">{info.name} {info.lastname}</h2>
+            <p className="text-sm text-gray-500">{info.phone}</p>
+            <Badge variant="secondary" className="mt-1">{info.email}</Badge>
             <Button className="mt-4 w-full">
               <Mail className="h-4 w-4 mr-2" /> Message
             </Button>

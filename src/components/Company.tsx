@@ -276,7 +276,7 @@ export default function Company() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              {(["branchName", "country", "branchCode", "address"] as const).map(
+              {(["Company Name", "country", "Company Code", "address"] as const).map(
                 (key) => (
                   <div key={key}>
                     <Label className="py-2">
@@ -387,9 +387,9 @@ export default function Company() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Branch Name</TableHead>
+                <TableHead>Company Name</TableHead>
                 <TableHead>Country</TableHead>
-                <TableHead>Branch Code</TableHead>
+                <TableHead>Comapany Code</TableHead>
                 <TableHead>Address</TableHead>
                 <TableHead>Courses</TableHead>
                 <TableHead>Created At</TableHead>
