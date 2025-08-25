@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -40,7 +40,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { open, toggleSidebar } = useSidebar();
+  const { open, toggleSidebar, setOpen } = useSidebar();
   const location = useLocation();
   const [formData, setFormData] = useState({
     batch: "",
@@ -67,6 +67,8 @@ export function AppSidebar() {
     fromDate?: string;
     toDate?: string;
   }
+  const navigate = useNavigate();
+
 
   const [branches, setBranches] = useState<any>([])
   const [courses, setCourses] = useState([]);
@@ -213,7 +215,7 @@ export function AppSidebar() {
       <SidebarContent className="overflow-y-auto no-scrollbar">
         {/* Mobile Close Button */}
         {open && (
-          <div className="flex justify-end p-4 md:hidden">
+          <div className="flex justify-end p-4 sm:hidden">
             <button
               onClick={toggleSidebar}
               className="text-gray-500 hover:text-gray-800 transition"
@@ -254,6 +256,13 @@ export function AppSidebar() {
                             ? "bg-sky-500 text-white font-semibold shadow-sm hover:bg-sky-500"
                             : "text-gray-700 hover:bg-gray-100 hover:shadow-sm"
                           }`}
+                        onClick={()=>{
+                          if(window.innerWidth<768){
+                            toggleSidebar()
+                          }
+                        }}
+
+
                       >
                         <item.icon
                           className={`h-5 w-5 transition-transform duration-200 ${isActive
@@ -270,13 +279,13 @@ export function AppSidebar() {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
+                  <Button className="bg-blue-600 hover:bg-blue-700 gap-2 ">
                     <PlusCircle className="w-4 h-4" />
                     Add Batch Schedule
                   </Button>
                 </DialogTrigger>
 
-                <DialogContent className="sm:max-w-[550px] p-6">
+                <DialogContent className="sm:max-w-[550px] p-6  overflow-y-auto max-sm:h-[100%]">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-semibold text-gray-800">
                       Create Batch Schedule
@@ -338,7 +347,7 @@ export function AppSidebar() {
                           <SelectValue placeholder="Select Branch Name" />
                         </SelectTrigger>
                         <SelectContent>
-                          {branches?.map((b:any) => (
+                          {branches?.map((b: any) => (
                             <SelectItem key={b._id} value={b._id}>
                               {b.branchName}
                             </SelectItem>
@@ -359,7 +368,7 @@ export function AppSidebar() {
                           <SelectValue placeholder="Select Course" />
                         </SelectTrigger>
                         <SelectContent>
-                          {courses?.map((c:any) => (
+                          {courses?.map((c: any) => (
                             <SelectItem key={c._id} value={c._id}>
                               {c.name}
                             </SelectItem>
@@ -420,7 +429,7 @@ export function AppSidebar() {
                           {instructer?.length === 0 ? (
                             <p className="text-gray-500 px-2 py-1">No Instructor available</p>
                           ) : (
-                            instructer?.map((b:any) => (
+                            instructer?.map((b: any) => (
                               <SelectItem key={b._id} value={b._id}>
                                 {b.name}
                               </SelectItem>
@@ -485,8 +494,13 @@ export function AppSidebar() {
 
           {/* Logout Button */}
           <button
-            onClick={() => console.log("Logout clicked")}
+            onClick={() => {
+              localStorage.removeItem("isAuthenticated")
+              localStorage.removeItem("info")
+              navigate("/login")
+            }}
             className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 active:scale-95 transition-all duration-200 shadow-sm"
+
           >
             Logout
           </button>
