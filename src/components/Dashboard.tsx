@@ -226,7 +226,7 @@ export function DashboardArea() {
           </div>
         </div>
         <div >
-          <Dialog open={open} onOpenChange={setOpen}>
+          {/* <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <PlusCircle className="h-5 w-5 text-primary" />
@@ -284,7 +284,7 @@ export function DashboardArea() {
                 </DialogFooter>
               </form>
             </DialogContent>
-          </Dialog>
+          </Dialog> */}
         </div>
       </div>
 
