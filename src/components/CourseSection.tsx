@@ -109,7 +109,7 @@ export function CoursesSection({ company }: CoursesSectionProps) {
       }
       const response = await axios.get(`${baseUrl}/api/course/all`)
       const data = response.data
-      console.log(data.courses)
+      // console.log(data.courses)
       setCourses(data.courses)
     } catch (error) {
       console.error(error);
@@ -167,11 +167,6 @@ export function CoursesSection({ company }: CoursesSectionProps) {
     fetchCourses(true)
 
   }, [])
-
-
-  useEffect(() => {
-    console.log(selectedCourse)
-  })
 
   return (
     <div className="space-y-6">

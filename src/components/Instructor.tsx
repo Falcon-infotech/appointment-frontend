@@ -81,7 +81,7 @@ const Instructor = () => {
         setLoading(true);
         const res = await api.get(`${baseUrl}/api/inspector/all`);
         const data = res.data?.inspectors;
-        console.log(data)
+        // console.log(data)
         setInstructors(data);
       } catch (error) {
         console.error(error);

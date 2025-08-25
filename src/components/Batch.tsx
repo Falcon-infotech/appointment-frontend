@@ -19,6 +19,7 @@ interface Batch {
 const Batch = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [batch, setBatch] = useState([])
+    const [filteredBatch, setFilteredBatch] = useState([])
     const [] = useState()
     const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -50,12 +51,20 @@ const Batch = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const fetchBatches = async (flag: boolean) => {
+        const today = new Date();
         if (flag) setLoading(true)
         try {
 
             const response = await api.get(`${baseUrl}/api/batch/all`)
             const data = response.data.batches
-            console.log(data)
+            const filteredData = data.filter((batch: any) => {
+                const fromDate = new Date(batch.fromDate)
+                const toDate = new Date(batch.toDate)
+
+                return fromDate >= today && toDate >= today
+            })
+            console.log(filteredData)
+            setFilteredBatch(filteredData)
             setBatch(data || [])
         } catch (error) {
             console.error(error)
@@ -198,6 +207,8 @@ const Batch = () => {
         return Object.values(err).length === 0;
     };
 
+
+
     const handleDelete = async (id: string) => {
         const prevBranches = [...branches];
 
@@ -293,280 +304,566 @@ const Batch = () => {
                 <div className="text-center text-sky-500 py-6">No Batches Found</div>
             ) : (
                 // Table
-                <div className="overflow-x-auto rounded-lg border shadow-sm">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-gray-100">
-                                <TableHead className="w-[180px]">Batch Name</TableHead>
-                                <TableHead className="w-[120px]">Code</TableHead>
-                                <TableHead>Branch</TableHead>
-                                <TableHead>Inspector</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Course</TableHead>
-                                <TableHead>Phone</TableHead>
-                                <TableHead>From</TableHead>
-                                <TableHead>To</TableHead>
-                                <TableHead className="text-center w-[150px]">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {batch.map((b) => (
-                                <TableRow key={b._id} className="hover:bg-gray-50" onClick={(e) => {
-                                    // prevent firing row click if clicked inside action buttons
-                                    const isInsideActions = e.target.closest("button, [role='dialog']");
-                                    if (isInsideActions) return;
+                <div className=''>
+                    <h1 className='pt-10 pb-5 font-semibold pl-6'>Upcoming Branches</h1>
 
-                                    handleRowClick(b._id);
-                                }}>
-                                    <TableCell className="font-medium">{b.name}</TableCell>
-                                    <TableCell>{b.code}</TableCell>
-                                    <TableCell>{b.branchId?.branchName}</TableCell>
-                                    <TableCell>{b.inspectorId?.name}</TableCell>
-                                    <TableCell>{b.inspectorId?.email}</TableCell>
-                                    <TableCell>{b.courseId?.name}</TableCell>
-                                    <TableCell>{b.inspectorId?.phone}</TableCell>
-                                    <TableCell>
-                                        {new Date(b.fromDate).toLocaleDateString("en-GB", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            year: "2-digit",
-                                        })}
-                                    </TableCell>
-                                    <TableCell>
-                                        {new Date(b.toDate).toLocaleDateString("en-GB", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            year: "2-digit",
-                                        })}
-                                    </TableCell>
-                                    <TableCell className="flex justify-center gap-2">
-
-                                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                                            <DialogTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="flex items-center gap-1"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setFormData({
-                                                            batch: b.code || "",
-                                                            batchName: b.name || "",
-                                                            branchName: b.branchId?._id || "",
-                                                            course: b.courseId?._id || "",
-                                                            startDate: b.fromDate?.split("T")[0] || "",
-                                                            endDate: b.toDate?.split("T")[0] || "",
-                                                            instructorName: b.inspectorId?._id || "",
-                                                        });
-                                                        setEditingId(b._id);
-                                                    }}
-
-                                                >
-                                                    <Edit className="h-4 w-4" /> Edit
-                                                </Button>
-                                            </DialogTrigger>
-
-                                            <DialogContent className="sm:max-w-[550px] p-6">
-                                                <DialogHeader>
-                                                    <DialogTitle className="text-xl font-semibold text-gray-800">
-                                                        Create Batch Schedule
-                                                    </DialogTitle>
-                                                </DialogHeader>
-
-                                                {/* Form Fields */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                                                    {/* Batch */}
-                                                    <div className="space-y-2">
-                                                        <Label>Batch Code *</Label>
-
-                                                        <Input
-                                                            type="text"
-                                                            onChange={(v) => handleChange("batch", v.target.value)}
-                                                            value={formData.batch}
-                                                        />
-                                                        {errors?.batch && (
-                                                            <p className="text-sm text-red-500">{errors.batch}</p>
-                                                        )}
-
-                                                    </div>
-
-                                                    {/* Batch Name */}
-                                                    <div className="space-y-2">
-                                                        <Label>Batch Name *</Label>
-
-                                                        <Input
-                                                            type="text"
-                                                            onChange={(v) => handleChange("batchName", v.target.value)}
-                                                            value={formData.batchName}
-                                                        />
-                                                        {errors?.batchName && (
-                                                            <p className="text-sm text-red-500">{errors.batchName}</p>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Branch */}
-                                                    <div className="space-y-2">
-                                                        <Label>Branch Name *</Label>
-                                                        <Select onValueChange={(v) => handleChange("branchName", v)} value={formData.branchName}  >
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Select Branch Name" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {branches?.map((b) => (
-                                                                    <SelectItem key={b._id} value={b._id}>
-                                                                        {b.branchName}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        {err.branchId && <p className="text-sm text-red-500">{err.branchId}</p>}
-                                                        {errors?.branchName && (
-                                                            <p className="text-sm text-red-500">{errors.branchName}</p>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Course */}
-                                                    <div className="space-y-2">
-                                                        <Label>Course *</Label>
-                                                        <Select onValueChange={(v) => handleChange("course", v)} value={formData.course}
-                                                        >
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Select Course" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {courses?.map((c) => (
-                                                                    <SelectItem key={c._id} value={c._id}>
-                                                                        {c.name}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        {err.courseId && <p className="text-sm text-red-500">{err.courseId}</p>}
-                                                        {errors?.course && (
-                                                            <p className="text-sm text-red-500">{errors.course}</p>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Start Date */}
-                                                    <div className="space-y-2">
-                                                        <Label>Start Date *</Label>
-                                                        <Input
-                                                            type="date"
-                                                            value={formData.startDate}
-                                                            onChange={(e) => handleChange("startDate", e.target.value)}
-                                                        />
-                                                        {err.fromDate && <p className="text-sm text-red-500">{err.fromDate}</p>}
-                                                        {errors?.startDate && (
-                                                            <p className="text-sm text-red-500">{errors.startDate}</p>
-                                                        )}
-                                                    </div>
-
-                                                    {/* End Date */}
-                                                    <div className="space-y-2">
-                                                        <Label>End Date *</Label>
-                                                        <Input
-                                                            type="date"
-                                                            value={formData.endDate}
-                                                            onChange={(e) => handleChange("endDate", e.target.value)}
-                                                        />
-                                                        {err.toDate && <p className="text-sm text-red-500">{err.toDate}</p>}
-                                                        {errors?.endDate && (
-                                                            <p className="text-sm text-red-500">{errors.endDate}</p>
-                                                        )}
-                                                    </div>
-
-
-                                                    <div className="space-y-2">
-                                                        <Label>
-                                                            check available Instructers
-                                                        </Label>
-                                                        <Button onClick={checkAvailable}>View</Button>
-                                                    </div>
-
-
-                                                    {/* Instructor */}
-                                                    <div className="space-y-2">
-                                                        <Label>Instructor Name *</Label>
-                                                        <Select onValueChange={(v) => handleChange("instructorName", v)}>
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Select Instructor" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {instructer?.length === 0 ? (
-                                                                    <p className="text-gray-500 px-2 py-1">No Instructor available</p>
-                                                                ) : (
-                                                                    instructer?.map((b) => (
-                                                                        <SelectItem key={b._id} value={b._id}>
-                                                                            {b.name}
-                                                                        </SelectItem>
-                                                                    ))
-                                                                )}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        {errors?.instructorName && (
-                                                            <p className="text-sm text-red-500">{errors.instructorName}</p>
-                                                        )}
-                                                    </div>
-
-
-
-                                                </div>
-
-                                                {/* Footer */}
-                                                <DialogFooter className="mt-6 flex justify-end gap-3">
-                                                    <DialogClose asChild>
-                                                        <Button variant="outline">Cancel</Button>
-                                                    </DialogClose>
-                                                    <Button
-                                                        className="bg-blue-600 hover:bg-blue-700"
-                                                        onClick={handleEdit}
-                                                        type='submit'
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
-
-                                        {/* Delete Confirmation Dialog */}
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button variant="destructive" className="flex items-center">
-                                                    <Trash className="h-4 w-4 mr-2" />
-                                                    Delete
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-md">
-                                                <DialogHeader>
-                                                    <DialogTitle className="text-xl font-semibold text-red-600">
-                                                        Delete Batch
-                                                    </DialogTitle>
-                                                </DialogHeader>
-                                                <div className="py-4 text-sm text-muted-foreground">
-                                                    Are you sure you want to delete{" "}
-                                                    <span className="font-medium">{b.name}</span>? This action
-                                                    cannot be undone.
-                                                </div>
-                                                <DialogFooter>
-                                                    <DialogClose asChild>
-                                                        <Button variant="outline">Cancel</Button>
-                                                    </DialogClose>
-                                                    <Button
-                                                        variant="destructive"
-                                                        onClick={() => {
-                                                            handleDelete(b._id)
-                                                        }}
-                                                    >
-                                                        Yes, Delete
-                                                    </Button>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </TableCell>
+                    <div className="overflow-x-auto rounded-lg border shadow-sm">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-gray-100">
+                                    <TableHead className="w-[180px]">Batch Name</TableHead>
+                                    <TableHead className="w-[120px]">Code</TableHead>
+                                    <TableHead>Branch</TableHead>
+                                    <TableHead>Instructor</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Course</TableHead>
+                                    <TableHead>Phone</TableHead>
+                                    <TableHead>From</TableHead>
+                                    <TableHead>To</TableHead>
+                                    <TableHead className="text-center w-[150px]">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredBatch.map((b) => (
+                                    <TableRow key={b._id} className="hover:bg-gray-50" onClick={(e) => {
+                                        // prevent firing row click if clicked inside action buttons
+                                        const isInsideActions = e.target.closest("button, [role='dialog']");
+                                        if (isInsideActions) return;
+
+                                        handleRowClick(b._id);
+                                    }}>
+                                        <TableCell className="font-medium">{b.name}</TableCell>
+                                        <TableCell>{b.code}</TableCell>
+                                        <TableCell>{b.branchId?.branchName}</TableCell>
+                                        <TableCell>{b.inspectorId?.name}</TableCell>
+                                        <TableCell>{b.inspectorId?.email}</TableCell>
+                                        <TableCell>{b.courseId?.name}</TableCell>
+                                        <TableCell>{b.inspectorId?.phone}</TableCell>
+                                        <TableCell>
+                                            {new Date(b.fromDate).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "2-digit",
+                                            })}
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(b.toDate).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "2-digit",
+                                            })}
+                                        </TableCell>
+                                        <TableCell className="flex justify-center gap-2">
+
+                                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex items-center gap-1"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setFormData({
+                                                                batch: b.code || "",
+                                                                batchName: b.name || "",
+                                                                branchName: b.branchId?._id || "",
+                                                                course: b.courseId?._id || "",
+                                                                startDate: b.fromDate?.split("T")[0] || "",
+                                                                endDate: b.toDate?.split("T")[0] || "",
+                                                                instructorName: b.inspectorId?._id || "",
+                                                            });
+                                                            setEditingId(b._id);
+                                                        }}
+
+                                                    >
+                                                        <Edit className="h-4 w-4" /> Edit
+                                                    </Button>
+                                                </DialogTrigger>
+
+                                                <DialogContent className="sm:max-w-[550px] p-6  overflow-y-auto max-sm:h-[100%]">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="text-xl font-semibold text-gray-800">
+                                                            Create Batch Schedule
+                                                        </DialogTitle>
+                                                    </DialogHeader>
+
+                                                    {/* Form Fields */}
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                                        {/* Batch */}
+                                                        <div className="space-y-2">
+                                                            <Label>Batch Code *</Label>
+
+                                                            <Input
+                                                                type="text"
+                                                                onChange={(v) => handleChange("batch", v.target.value)}
+                                                                value={formData.batch}
+                                                            />
+                                                            {errors?.batch && (
+                                                                <p className="text-sm text-red-500">{errors.batch}</p>
+                                                            )}
+
+                                                        </div>
+
+                                                        {/* Batch Name */}
+                                                        <div className="space-y-2">
+                                                            <Label>Batch Name *</Label>
+
+                                                            <Input
+                                                                type="text"
+                                                                onChange={(v) => handleChange("batchName", v.target.value)}
+                                                                value={formData.batchName}
+                                                            />
+                                                            {errors?.batchName && (
+                                                                <p className="text-sm text-red-500">{errors.batchName}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Branch */}
+                                                        <div className="space-y-2">
+                                                            <Label>Branch Name *</Label>
+                                                            <Select onValueChange={(v) => handleChange("branchName", v)} value={formData.branchName}  >
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Branch Name" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {branches?.map((b) => (
+                                                                        <SelectItem key={b._id} value={b._id}>
+                                                                            {b.branchName}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {err.branchId && <p className="text-sm text-red-500">{err.branchId}</p>}
+                                                            {errors?.branchName && (
+                                                                <p className="text-sm text-red-500">{errors.branchName}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Course */}
+                                                        <div className="space-y-2">
+                                                            <Label>Course *</Label>
+                                                            <Select onValueChange={(v) => handleChange("course", v)} value={formData.course}
+                                                            >
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Course" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {courses?.map((c) => (
+                                                                        <SelectItem key={c._id} value={c._id}>
+                                                                            {c.name}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {err.courseId && <p className="text-sm text-red-500">{err.courseId}</p>}
+                                                            {errors?.course && (
+                                                                <p className="text-sm text-red-500">{errors.course}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Start Date */}
+                                                        <div className="space-y-2">
+                                                            <Label>Start Date *</Label>
+                                                            <Input
+                                                                type="date"
+                                                                value={formData.startDate}
+                                                                onChange={(e) => handleChange("startDate", e.target.value)}
+                                                            />
+                                                            {err.fromDate && <p className="text-sm text-red-500">{err.fromDate}</p>}
+                                                            {errors?.startDate && (
+                                                                <p className="text-sm text-red-500">{errors.startDate}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* End Date */}
+                                                        <div className="space-y-2">
+                                                            <Label>End Date *</Label>
+                                                            <Input
+                                                                type="date"
+                                                                value={formData.endDate}
+                                                                onChange={(e) => handleChange("endDate", e.target.value)}
+                                                            />
+                                                            {err.toDate && <p className="text-sm text-red-500">{err.toDate}</p>}
+                                                            {errors?.endDate && (
+                                                                <p className="text-sm text-red-500">{errors.endDate}</p>
+                                                            )}
+                                                        </div>
+
+
+                                                        <div className="space-y-2">
+                                                            <Label>
+                                                                check available Instructers
+                                                            </Label>
+                                                            <Button onClick={checkAvailable}>View</Button>
+                                                        </div>
+
+
+                                                        {/* Instructor */}
+                                                        <div className="space-y-2">
+                                                            <Label>Instructor Name *</Label>
+                                                            <Select onValueChange={(v) => handleChange("instructorName", v)}>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Instructor" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {instructer?.length === 0 ? (
+                                                                        <p className="text-gray-500 px-2 py-1">No Instructor available</p>
+                                                                    ) : (
+                                                                        instructer?.map((b) => (
+                                                                            <SelectItem key={b._id} value={b._id}>
+                                                                                {b.name}
+                                                                            </SelectItem>
+                                                                        ))
+                                                                    )}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {errors?.instructorName && (
+                                                                <p className="text-sm text-red-500">{errors.instructorName}</p>
+                                                            )}
+                                                        </div>
+
+
+
+                                                    </div>
+
+                                                    {/* Footer */}
+                                                    <DialogFooter className="mt-6 flex justify-end gap-3">
+                                                        <DialogClose asChild>
+                                                            <Button variant="outline">Cancel</Button>
+                                                        </DialogClose>
+                                                        <Button
+                                                            className="bg-blue-600 hover:bg-blue-700"
+                                                            onClick={handleEdit}
+                                                            type='submit'
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+
+                                            {/* Delete Confirmation Dialog */}
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="destructive" className="flex items-center">
+                                                        <Trash className="h-4 w-4 mr-2" />
+                                                        Delete
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="max-w-md">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="text-xl font-semibold text-red-600">
+                                                            Delete Batch
+                                                        </DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className="py-4 text-sm text-muted-foreground">
+                                                        Are you sure you want to delete{" "}
+                                                        <span className="font-medium">{b.name}</span>? This action
+                                                        cannot be undone.
+                                                    </div>
+                                                    <DialogFooter>
+                                                        <DialogClose asChild>
+                                                            <Button variant="outline">Cancel</Button>
+                                                        </DialogClose>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() => {
+                                                                handleDelete(b._id)
+                                                            }}
+                                                        >
+                                                            Yes, Delete
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                    <h1 className='pt-10 pb-5 font-semibold pl-6'>All Batches</h1>
+
+
+                    <div className="overflow-x-auto rounded-lg border shadow-sm">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-gray-100">
+                                    <TableHead className="w-[180px]">Batch Name</TableHead>
+                                    <TableHead className="w-[120px]">Code</TableHead>
+                                    <TableHead>Branch</TableHead>
+                                    <TableHead>Instructor</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Course</TableHead>
+                                    <TableHead>Phone</TableHead>
+                                    <TableHead>From</TableHead>
+                                    <TableHead>To</TableHead>
+                                    <TableHead className="text-center w-[150px]">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {batch.map((b) => (
+                                    <TableRow key={b._id} className="hover:bg-gray-50" onClick={(e) => {
+                                        // prevent firing row click if clicked inside action buttons
+                                        const isInsideActions = e.target.closest("button, [role='dialog']");
+                                        if (isInsideActions) return;
+
+                                        handleRowClick(b._id);
+                                    }}>
+                                        <TableCell className="font-medium">{b.name}</TableCell>
+                                        <TableCell>{b.code}</TableCell>
+                                        <TableCell>{b.branchId?.branchName}</TableCell>
+                                        <TableCell>{b.inspectorId?.name}</TableCell>
+                                        <TableCell>{b.inspectorId?.email}</TableCell>
+                                        <TableCell>{b.courseId?.name}</TableCell>
+                                        <TableCell>{b.inspectorId?.phone}</TableCell>
+                                        <TableCell>
+                                            {new Date(b.fromDate).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "2-digit",
+                                            })}
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(b.toDate).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "2-digit",
+                                            })}
+                                        </TableCell>
+                                        <TableCell className="flex justify-center gap-2">
+
+                                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex items-center gap-1"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setFormData({
+                                                                batch: b.code || "",
+                                                                batchName: b.name || "",
+                                                                branchName: b.branchId?._id || "",
+                                                                course: b.courseId?._id || "",
+                                                                startDate: b.fromDate?.split("T")[0] || "",
+                                                                endDate: b.toDate?.split("T")[0] || "",
+                                                                instructorName: b.inspectorId?._id || "",
+                                                            });
+                                                            setEditingId(b._id);
+                                                        }}
+
+                                                    >
+                                                        <Edit className="h-4 w-4" /> Edit
+                                                    </Button>
+                                                </DialogTrigger>
+
+                                                <DialogContent className="sm:max-w-[550px] p-6  overflow-y-auto max-sm:h-[100%]">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="text-xl font-semibold text-gray-800">
+                                                            Create Batch Schedule
+                                                        </DialogTitle>
+                                                    </DialogHeader>
+
+                                                    {/* Form Fields */}
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                                        {/* Batch */}
+                                                        <div className="space-y-2">
+                                                            <Label>Batch Code *</Label>
+
+                                                            <Input
+                                                                type="text"
+                                                                onChange={(v) => handleChange("batch", v.target.value)}
+                                                                value={formData.batch}
+                                                            />
+                                                            {errors?.batch && (
+                                                                <p className="text-sm text-red-500">{errors.batch}</p>
+                                                            )}
+
+                                                        </div>
+
+                                                        {/* Batch Name */}
+                                                        <div className="space-y-2">
+                                                            <Label>Batch Name *</Label>
+
+                                                            <Input
+                                                                type="text"
+                                                                onChange={(v) => handleChange("batchName", v.target.value)}
+                                                                value={formData.batchName}
+                                                            />
+                                                            {errors?.batchName && (
+                                                                <p className="text-sm text-red-500">{errors.batchName}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Branch */}
+                                                        <div className="space-y-2">
+                                                            <Label>Branch Name *</Label>
+                                                            <Select onValueChange={(v) => handleChange("branchName", v)} value={formData.branchName}  >
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Branch Name" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {branches?.map((b) => (
+                                                                        <SelectItem key={b._id} value={b._id}>
+                                                                            {b.branchName}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {err.branchId && <p className="text-sm text-red-500">{err.branchId}</p>}
+                                                            {errors?.branchName && (
+                                                                <p className="text-sm text-red-500">{errors.branchName}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Course */}
+                                                        <div className="space-y-2">
+                                                            <Label>Course *</Label>
+                                                            <Select onValueChange={(v) => handleChange("course", v)} value={formData.course}
+                                                            >
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Course" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {courses?.map((c) => (
+                                                                        <SelectItem key={c._id} value={c._id}>
+                                                                            {c.name}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {err.courseId && <p className="text-sm text-red-500">{err.courseId}</p>}
+                                                            {errors?.course && (
+                                                                <p className="text-sm text-red-500">{errors.course}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Start Date */}
+                                                        <div className="space-y-2">
+                                                            <Label>Start Date *</Label>
+                                                            <Input
+                                                                type="date"
+                                                                value={formData.startDate}
+                                                                onChange={(e) => handleChange("startDate", e.target.value)}
+                                                            />
+                                                            {err.fromDate && <p className="text-sm text-red-500">{err.fromDate}</p>}
+                                                            {errors?.startDate && (
+                                                                <p className="text-sm text-red-500">{errors.startDate}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* End Date */}
+                                                        <div className="space-y-2">
+                                                            <Label>End Date *</Label>
+                                                            <Input
+                                                                type="date"
+                                                                value={formData.endDate}
+                                                                onChange={(e) => handleChange("endDate", e.target.value)}
+                                                            />
+                                                            {err.toDate && <p className="text-sm text-red-500">{err.toDate}</p>}
+                                                            {errors?.endDate && (
+                                                                <p className="text-sm text-red-500">{errors.endDate}</p>
+                                                            )}
+                                                        </div>
+
+
+                                                        <div className="space-y-2">
+                                                            <Label>
+                                                                check available Instructers
+                                                            </Label>
+                                                            <Button onClick={checkAvailable}>View</Button>
+                                                        </div>
+
+
+                                                        {/* Instructor */}
+                                                        <div className="space-y-2">
+                                                            <Label>Instructor Name *</Label>
+                                                            <Select onValueChange={(v) => handleChange("instructorName", v)}>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Instructor" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {instructer?.length === 0 ? (
+                                                                        <p className="text-gray-500 px-2 py-1">No Instructor available</p>
+                                                                    ) : (
+                                                                        instructer?.map((b) => (
+                                                                            <SelectItem key={b._id} value={b._id}>
+                                                                                {b.name}
+                                                                            </SelectItem>
+                                                                        ))
+                                                                    )}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {errors?.instructorName && (
+                                                                <p className="text-sm text-red-500">{errors.instructorName}</p>
+                                                            )}
+                                                        </div>
+
+
+
+                                                    </div>
+
+                                                    {/* Footer */}
+                                                    <DialogFooter className="mt-6 flex justify-end gap-3">
+                                                        <DialogClose asChild>
+                                                            <Button variant="outline">Cancel</Button>
+                                                        </DialogClose>
+                                                        <Button
+                                                            className="bg-blue-600 hover:bg-blue-700"
+                                                            onClick={handleEdit}
+                                                            type='submit'
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+
+                                            {/* Delete Confirmation Dialog */}
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="destructive" className="flex items-center">
+                                                        <Trash className="h-4 w-4 mr-2" />
+                                                        Delete
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="max-w-md">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="text-xl font-semibold text-red-600">
+                                                            Delete Batch
+                                                        </DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className="py-4 text-sm text-muted-foreground">
+                                                        Are you sure you want to delete{" "}
+                                                        <span className="font-medium">{b.name}</span>? This action
+                                                        cannot be undone.
+                                                    </div>
+                                                    <DialogFooter>
+                                                        <DialogClose asChild>
+                                                            <Button variant="outline">Cancel</Button>
+                                                        </DialogClose>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() => {
+                                                                handleDelete(b._id)
+                                                            }}
+                                                        >
+                                                            Yes, Delete
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+
+
+
                 </div>
             )}
 

@@ -14,7 +14,7 @@ const DashboardMetrics = ({ totals }) => {
       description: "All scheduled batches",
     },
     {
-      title: "Total Inspectors",
+      title: "Total Instructors",
       value: totals.totalInspectors,
       change: "+5%",
       trend: "up",
