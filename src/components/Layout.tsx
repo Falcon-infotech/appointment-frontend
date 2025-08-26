@@ -98,7 +98,7 @@ const LayoutContent = () => {
           </header>
 
           {/* Sidebar Trigger */}
-          <div className="flex items-center p-2 absolute">
+          <div className="flex items-center p-2 absolute sm:hidden">
             <button
               onClick={toggleSidebar}
               className="p-2 rounded bg-gray-300 hover:bg-gray-400 transition-colors duration-300"
