@@ -320,7 +320,7 @@ const Batch = () => {
             ) : (
                 // Table
                 <div className=''>
-                    <h1 className='pt-10 pb-5 font-semibold pl-6'>Upcoming Branches</h1>
+                    <h1 className='pt-10 pb-5 font-semibold pl-6'>Upcoming Batches</h1>
 
                     <div className="overflow-x-auto rounded-lg border shadow-sm">
                         <Table>
@@ -330,7 +330,7 @@ const Batch = () => {
                                     <TableHead className="w-[120px]">Code</TableHead>
                                     <TableHead>Branch</TableHead>
                                     <TableHead>Instructor</TableHead>
-                                    <TableHead>Email</TableHead>
+                                    <TableHead>Schedule By</TableHead>
                                     <TableHead>Course</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Phone</TableHead>
@@ -358,7 +358,7 @@ const Batch = () => {
                                         <TableCell>{b.code}</TableCell>
                                         <TableCell>{b.branchId?.branchName}</TableCell>
                                         <TableCell>{b.inspectorId?.name}</TableCell>
-                                        <TableCell>{b.inspectorId?.email}</TableCell>
+                                        <TableCell>{b.scheduledBy?.first_name|| "NA"}</TableCell>
                                         <TableCell>{b.courseId?.name}</TableCell>
                                         <TableCell> <Chip
                                             label={b.status}
@@ -620,7 +620,7 @@ const Batch = () => {
                                     <TableHead className="w-[120px]">Code</TableHead>
                                     <TableHead>Branch</TableHead>
                                     <TableHead>Instructor</TableHead>
-                                    <TableHead>Email</TableHead>
+                                    <TableHead>Schedule By</TableHead>
                                     <TableHead>Course</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Phone</TableHead>
@@ -648,7 +648,7 @@ const Batch = () => {
                                         <TableCell>{b.code}</TableCell>
                                         <TableCell>{b.branchId?.branchName}</TableCell>
                                         <TableCell>{b.inspectorId?.name}</TableCell>
-                                        <TableCell>{b.inspectorId?.email}</TableCell>
+                                        <TableCell>{b.scheduledBy?.first_name|| "NA"}</TableCell>
                                         <TableCell>{b.courseId?.name}</TableCell>
                                         <TableCell> <Chip
                                             label={b.status}
