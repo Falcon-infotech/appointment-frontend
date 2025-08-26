@@ -9,7 +9,7 @@ import { Label } from './ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Input } from './ui/input'
 import toast from 'react-hot-toast'
-import { Item } from '@radix-ui/react-select'
+import Chip from '@mui/material/Chip'
 
 
 
@@ -63,7 +63,7 @@ const Batch = () => {
 
                 return fromDate >= today && toDate >= today
             })
-            console.log(filteredData)
+            console.log(data)
             setFilteredBatch(filteredData)
             setBatch(data || [])
         } catch (error) {
@@ -73,6 +73,21 @@ const Batch = () => {
             setLoading(false)
         }
     }
+
+
+    function getStatusColor(status: string): string {
+        switch (status?.toLowerCase()) {
+            case "completed":
+                return "success"; // ✅ green
+            case "on going":
+                return "warning"; // 🟡 orange/yellow
+            case "up coming":
+                return "info";    // 🔵 blue
+            default:
+                return "default"; // ⚪ gray
+        }
+    }
+
 
 
     useEffect(() => {
@@ -317,6 +332,7 @@ const Batch = () => {
                                     <TableHead>Instructor</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Course</TableHead>
+                                    <TableHead>Status</TableHead>
                                     <TableHead>Phone</TableHead>
                                     <TableHead>From</TableHead>
                                     <TableHead>To</TableHead>
@@ -324,7 +340,13 @@ const Batch = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredBatch.map((b) => (
+                                {filteredBatch.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={11} className="text-center py-6 text-gray-500">
+                                            No upcoming batch found
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (filteredBatch.map((b) => (
                                     <TableRow key={b._id} className="hover:bg-gray-50" onClick={(e) => {
                                         // prevent firing row click if clicked inside action buttons
                                         const isInsideActions = e.target.closest("button, [role='dialog']");
@@ -338,6 +360,11 @@ const Batch = () => {
                                         <TableCell>{b.inspectorId?.name}</TableCell>
                                         <TableCell>{b.inspectorId?.email}</TableCell>
                                         <TableCell>{b.courseId?.name}</TableCell>
+                                        <TableCell> <Chip
+                                            label={b.status}
+                                            color={getStatusColor(b.status)}
+                                            variant="outlined"
+                                        /></TableCell>
                                         <TableCell>{b.inspectorId?.phone}</TableCell>
                                         <TableCell>
                                             {new Date(b.fromDate).toLocaleDateString("en-GB", {
@@ -578,7 +605,7 @@ const Batch = () => {
                                             </Dialog>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )))}
                             </TableBody>
                         </Table>
                     </div>
@@ -595,6 +622,7 @@ const Batch = () => {
                                     <TableHead>Instructor</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Course</TableHead>
+                                    <TableHead>Status</TableHead>
                                     <TableHead>Phone</TableHead>
                                     <TableHead>From</TableHead>
                                     <TableHead>To</TableHead>
@@ -602,7 +630,13 @@ const Batch = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {batch.map((b) => (
+                                {batch?.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={11} className="text-center py-6 text-gray-500">
+                                            No  batch found
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (batch.map((b) => (
                                     <TableRow key={b._id} className="hover:bg-gray-50" onClick={(e) => {
                                         // prevent firing row click if clicked inside action buttons
                                         const isInsideActions = e.target.closest("button, [role='dialog']");
@@ -616,6 +650,11 @@ const Batch = () => {
                                         <TableCell>{b.inspectorId?.name}</TableCell>
                                         <TableCell>{b.inspectorId?.email}</TableCell>
                                         <TableCell>{b.courseId?.name}</TableCell>
+                                        <TableCell> <Chip
+                                            label={b.status}
+                                            color={getStatusColor(b.status)}
+                                            variant="outlined"
+                                        /></TableCell>
                                         <TableCell>{b.inspectorId?.phone}</TableCell>
                                         <TableCell>
                                             {new Date(b.fromDate).toLocaleDateString("en-GB", {
@@ -856,7 +895,7 @@ const Batch = () => {
                                             </Dialog>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )))}
                             </TableBody>
                         </Table>
                     </div>

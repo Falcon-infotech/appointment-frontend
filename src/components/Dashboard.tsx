@@ -94,7 +94,7 @@ export function DashboardArea() {
       try {
         setinsLoading(true);
         const res = await api.get(`${baseUrl}/api/inspector/all`);
-        const data = res.data?.inspectors;
+        const data = res.data?.inspectors||[];
         // console.log(data)
         setInstructors(data);
       } catch (error) {
@@ -198,22 +198,6 @@ export function DashboardArea() {
   }
     , []);
 
-  const departmentData = [
-    { name: "Engineering", employees: 45, percentage: 35 },
-    { name: "Sales", employees: 28, percentage: 22 },
-    { name: "Marketing", employees: 22, percentage: 17 },
-    { name: "Operations", employees: 18, percentage: 14 },
-    { name: "HR", employees: 15, percentage: 12 },
-  ];
-
-  const revenueData = [
-    { month: "Jan", value: 85 },
-    { month: "Feb", value: 92 },
-    { month: "Mar", value: 78 },
-    { month: "Apr", value: 95 },
-    { month: "May", value: 88 },
-    { month: "Jun", value: 98 },
-  ];
 
   return (
     <div className="flex-1 bg-dashboard p-6 overflow-y-auto">
@@ -226,156 +210,20 @@ export function DashboardArea() {
           </div>
         </div>
         <div >
-          {/* <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <PlusCircle className="h-5 w-5 text-primary" />
-                Add User
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <form onSubmit={handleSubmit}>
-
-                <DialogHeader>
-                  <DialogTitle>Add profile</DialogTitle>
-                  <DialogDescription className="mb-2">
-                    Add new User here to give Access
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  <div className="grid gap-3">
-                    <Label htmlFor="name-1">FirstName</Label>
-                    <Input id="name-1" name="firstName" value={formData.firstName} onChange={handlechange} />
-                  </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="username-1">LastName</Label>
-                    <Input id="username-1" name="lastName" value={formData.lastName} onChange={handlechange} />
-                  </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="username-1">Email</Label>
-                    <Input id="username-1" type="email" name="email" value={formData.email} onChange={handlechange} placeholder="john@gmail.com" />
-                  </div>
-                  <div className="grid gap-3 relative">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="password"
-                      value={formData.password}
-                      onChange={handlechange}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-[70%] translate-y-[-50%] text-gray-500"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="username-1">Phone</Label>
-                    <Input id="username-1" type="tel" name="phone" value={formData.phone} onChange={handlechange} />
-                  </div>
-                </div>
-                <DialogFooter className="mt-5">
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit" >Save changes</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog> */}
+         
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {metrics.map((metric, index) => (
-          <Card key={index} className="bg-gradient-card border-0 shadow-lg hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {metric.title}
-              </CardTitle>
-              <div className={`p-2 rounded-lg bg-${metric.color}/10`}>
-                <div className={`text-${metric.color}`}>
-                  {metric.icon}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground mb-1 ">
-                {metric.value}
-              </div>
-              <div className="flex items-center text-sm">
-                {metric.trend === "up" ? (
-                  <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                )}
-                <span className={metric.trend === "up" ? "text-green-500" : "text-red-500"}>
-                  {metric.change}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div> */}
+   
       <DashboardMetrics totals={totals} />
       <EnhancedTable data={dashboardData} />
 
 
-      {/* Charts and Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Department Distribution */}
-        {/* <Card className="bg-gradient-card border-0 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-             Ucoming Batches
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {departmentData.map((dept, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-foreground">{dept.name}</span>
-                    <span className="text-muted-foreground">{dept.employees} people</span>
-                  </div>
-                  <Progress value={dept.percentage} className="h-2" />
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-4">
-              
-            </div>
-          </CardContent>
-        </Card> */}
+       
         <UpcomingBatchSchedule data={dashboardData} />
 
-        {/* Revenue Trend */}
-        {/* <Card className="bg-gradient-card border-0 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              Instructer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {revenueData.map((data, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground w-8">{data.month}</span>
-                  <div className="flex-1">
-                    <Progress value={data.value} className="h-3" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground w-8">{data.value}%</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card> */}
+      
         <div>
           <div className="bg-white p-6 rounded-2xl shadow-sm">
             {/* Header */}
@@ -415,20 +263,20 @@ export function DashboardArea() {
                   {instructors.length > 0 ? (
                     instructors.slice(0, 3).map((inst) => (
                       <div
-                        key={inst._id}
+                        key={inst?._id}
                         className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition cursor-pointer"
                       >
                         <div>
                           <h3 className="text-sm font-medium text-gray-800">
-                            {inst.name}
+                            {inst?.name}
                           </h3>
                           <p className="text-xs text-gray-500 flex items-center">
                             <Mail className="w-3 h-3 mr-1" />
-                            {inst.email}
+                            {inst?.email}
                           </p>
                           <p className="text-xs text-gray-500 flex items-center">
                             <Phone className="w-3 h-3 mr-1" />
-                            {inst.phone}
+                            {inst?.phone}
                           </p>
                         </div>
                       </div>

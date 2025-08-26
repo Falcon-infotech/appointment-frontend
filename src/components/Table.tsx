@@ -199,23 +199,24 @@ export default function EnhancedTable({ data }: any) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   const isLoading = !data || data.length === 0;
-
+  // console.log(data)
   const rows: Batch[] = React.useMemo(() => {
     if (!data) return [];
     return data.map((item: any) =>
       createBatch(
-        item.code, 
-        item.courseId?.name || "N/A",
-        item.courseId?.description || "N/A",
-        item.inspectorId?.name || "N/A",
-        item.fromDate
+        item?.code,
+        item?.courseId?.name || "N/A",
+        item?.courseId?.description || "N/A",
+        item?.inspectorId?.name || "N/A",
+        item?.fromDate
           ? new Date(item.fromDate).toLocaleDateString("en-US")
           : "N/A",
         item.toDate
           ? new Date(item.toDate).toLocaleDateString("en-US")
           : "N/A",
-        item.scheduledBy || "N/A"
-      )
+        typeof item?.scheduledBy === "object"
+          ? `${item?.scheduledBy?.first_name || ""} ${item?.scheduledBy?.last_name || ""}`.trim()
+          : item?.scheduledBy || "N/A")
     );
   }, [data]);
 
@@ -306,14 +307,14 @@ export default function EnhancedTable({ data }: any) {
                         />
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row">
-                        {row.id}
+                        {row?.id}
                       </TableCell>
-                      <TableCell>{row.batchName}</TableCell>
-                      <TableCell>{row.courseName}</TableCell>
-                      <TableCell>{row.instructorName}</TableCell>
-                      <TableCell>{row.batchStart}</TableCell>
-                      <TableCell>{row.batchEnd}</TableCell>
-                      <TableCell>{row.scheduledBy}</TableCell>
+                      <TableCell>{row?.batchName}</TableCell>
+                      <TableCell>{row?.courseName}</TableCell>
+                      <TableCell>{row?.instructorName}</TableCell>
+                      <TableCell>{row?.batchStart}</TableCell>
+                      <TableCell>{row?.batchEnd}</TableCell>
+                      <TableCell>{row?.scheduledBy}</TableCell>
                     </TableRow>
                   );
                 })}
