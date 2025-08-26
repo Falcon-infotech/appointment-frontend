@@ -276,26 +276,76 @@ export default function Company() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              {(["Company Name", "country", "Company Code", "address"] as const).map(
-                (key) => (
-                  <div key={key}>
-                    <Label className="py-2">
-                      {key.replace(/\b\w/g, (c) => c.toUpperCase())}
-                    </Label>
-                    <Input
-                      type="text"
-                      placeholder={key}
-                      value={newCompany[key] as string}
-                      onChange={(e) =>
-                        setNewCompany({ ...newCompany, [key]: e.target.value })
-                      }
-                    />
-                    {err?.[key] && (
-                      <p className="text-red-500 text-xs mt-1">{err[key]}</p>
-                    )}
-                  </div>
-                )
-              )}
+
+              <div>
+                <Label className="py-2">Company Name</Label>
+                <Input
+                  type="text"
+                  name="branchName"
+                  placeholder="Company Name"
+                  value={newCompany.branchName}
+                  onChange={(e) =>
+                    setNewCompany({ ...newCompany, branchName: e.target.value })
+                  }
+                />
+                {err?.branchName && (
+                  <p className="text-red-500 text-xs mt-1">{err.branchName}</p>
+                )}
+              </div>
+
+              {/* Country */}
+              <div>
+                <Label className="py-2">Country</Label>
+                <Input
+                  type="text"
+                  name="country"
+                  placeholder="Country"
+                  value={newCompany.country}
+                  onChange={(e) =>
+                    setNewCompany({ ...newCompany, country: e.target.value })
+                  }
+                />
+                {err?.country && (
+                  <p className="text-red-500 text-xs mt-1">{err.country}</p>
+                )}
+              </div>
+
+              {/* Branch Code */}
+              <div>
+                <Label className="py-2">Company Code</Label>
+                <Input
+                  type="text"
+                  name="branchCode"
+                  placeholder="Company Code"
+                  value={newCompany.branchCode}
+                  onChange={(e) =>
+                    setNewCompany({ ...newCompany, branchCode: e.target.value })
+                  }
+                />
+                {err?.branchCode && (
+                  <p className="text-red-500 text-xs mt-1">{err.branchCode}</p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div>
+                <Label className="py-2">Address</Label>
+                <Input
+                  type="text"
+                  name="address"
+                  placeholder="Address"
+                  value={newCompany.address}
+                  onChange={(e) =>
+                    setNewCompany({ ...newCompany, address: e.target.value })
+                  }
+                />
+                {err?.address && (
+                  <p className="text-red-500 text-xs mt-1">{err.address}</p>
+                )}
+              </div>
+
+
+
 
               {/* Courses */}
               <Popover open={open} onOpenChange={setOpen}>
@@ -442,7 +492,7 @@ export default function Company() {
                           });
                           setEditingBranchId(branch._id);
                           setIsEditMode(true);
-                          setIsAddDialogOpen(true); 
+                          setIsAddDialogOpen(true);
                         }}
                       >
                         <Edit className="h-4 w-4" /> Edit
