@@ -73,12 +73,15 @@ export function CoursesSection({ company }: CoursesSectionProps) {
     const fetchCourses = async () => {
       try {
         const [instructerResponse, branchResponse] = await Promise.all([
-          api.get(`${baseUrl}/api/inspector/all`),
+          api.get(`${baseUrl}/api/instructor/all`),
           api.get(`${baseUrl}/api/branch/all`),
         ]);
 
+        //  console.log(instructerResponse.data)
+        // console.log(branchResponse.data)
+
         // map inspectors
-        const inspectorOptions = instructerResponse.data?.inspectors.map((ins: any) => ({
+        const inspectorOptions = instructerResponse?.data?.instructors.map((ins: any) => ({
           value: ins._id,
           label: ins.name,
         }));
@@ -89,8 +92,10 @@ export function CoursesSection({ company }: CoursesSectionProps) {
           label: b.branchName,
         }));
 
-        setInstructer(inspectorOptions);
-        setBranch(branchOptions);
+       
+
+        setInstructer(inspectorOptions||[]);
+        setBranch(branchOptions||[]);
       } catch (error) {
         console.error(error);
       }
@@ -345,11 +350,11 @@ export function CoursesSection({ company }: CoursesSectionProps) {
                             <Label>Select Inspector</Label>
                             <MultiSelect
                               options={instructer}
-                              value={selectedCourse?.inspectorIds || []}
+                              value={selectedCourse?.instructorIds || []}
                               onChange={(val) =>
                                 setSelectedCourse({
                                   ...selectedCourse!,
-                                  inspectorIds: val,
+                                  instructorIds: val,
                                 })
                               }
                             />

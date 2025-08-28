@@ -93,8 +93,8 @@ export function DashboardArea() {
     const fetchInstructors = async () => {
       try {
         setinsLoading(true);
-        const res = await api.get(`${baseUrl}/api/inspector/all`);
-        const data = res.data?.inspectors||[];
+        const res = await api.get(`${baseUrl}/api/instructor/all`);
+        const data = res.data?.instructors||[];
         // console.log(data)
         setInstructors(data);
       } catch (error) {
