@@ -65,8 +65,8 @@ const Instructor = () => {
         phone:0,
         _id:""
       });
-      const response = await api.get(`${baseUrl}/api/inspector/${id}`);
-      setInstructorById(response.data.inspector);
+      const response = await api.get(`${baseUrl}/api/instructor/${id}`);
+      setInstructorById(response.data.inspector||[]);
     } catch (error) {
       console.error("Error fetching branch:", error);
     } finally {
@@ -79,10 +79,10 @@ const Instructor = () => {
     const fetchInstructors = async () => {
       try {
         setLoading(true);
-        const res = await api.get(`${baseUrl}/api/inspector/all`);
-        const data = res.data?.inspectors;
+        const res = await api.get(`${baseUrl}/api/instructor/all`);
+        const data = res.data?.instructors;
         // console.log(data)
-        setInstructors(data);
+        setInstructors(data||[]);
       } catch (error) {
         console.error(error);
       } finally {
@@ -137,7 +137,7 @@ const Instructor = () => {
       setOpen(false)
 
       try {
-        const res = await api.put(`${baseUrl}/api/inspector/${editingId}`, form);
+        const res = await api.put(`${baseUrl}/api/instructor/${editingId}`, form);
         if (res.status === 200) {
           toast.success("Instructor updated successfully");
         }
@@ -156,7 +156,7 @@ const Instructor = () => {
       setOpen(false)
 
       try {
-        const res = await api.post(`${baseUrl}/api/inspector/create`, form);
+        const res = await api.post(`${baseUrl}/api/instructor/create`, form);
         if (res.status === 200) {
           toast.success("Instructor added successfully");
 
@@ -190,7 +190,7 @@ const Instructor = () => {
     setInstructors(instructors.filter((inst) => inst._id !== id));
 
     try {
-      const res = await api.delete(`${baseUrl}/api/inspector/${id}`);
+      const res = await api.delete(`${baseUrl}/api/instructor/${id}`);
       if (res.status === 200) {
         toast.success("Instructor deleted successfully");
       }
@@ -262,7 +262,7 @@ const Instructor = () => {
         <div className="flex justify-center items-center h-40">
           <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-      ) : instructors.length === 0 ? (
+      ) : instructors?.length === 0 ? (
         // Empty state
         <div className="text-center text-sky-500 py-6">
           No Instructors Found

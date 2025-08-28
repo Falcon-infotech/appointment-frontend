@@ -23,7 +23,7 @@ function formatDate(input: string) {
 
 export default function UpcomingBatchSchedule({ data }: any) {
   const isLoading = !data || data.length === 0;
-
+// console.log(data)
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm">
       {/* Header */}
@@ -64,7 +64,7 @@ export default function UpcomingBatchSchedule({ data }: any) {
                   {batch.name}
                 </h3>
                 <p className="text-xs text-gray-500">
-                  Instructor: {batch.inspectorId.name}
+                  Instructor: {batch?.instructorId?.name}
                 </p>
               </div>
               <div className="flex items-center text-sm text-blue-600 font-medium">

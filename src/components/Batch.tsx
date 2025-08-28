@@ -22,7 +22,7 @@ const Batch = () => {
     const [filteredBatch, setFilteredBatch] = useState([])
     const [] = useState()
     const [dialogOpen, setDialogOpen] = useState(false);
-
+    const [delopen, setDelopen] = useState(false)
     const [formData, setFormData] = useState({
         batch: "",
         batchName: "",
@@ -31,6 +31,7 @@ const Batch = () => {
         startDate: "",
         endDate: "",
         branchName: "",
+        // scheduledBy:""
     });
     interface ValidationErrors {
         batch?: string;
@@ -40,6 +41,7 @@ const Batch = () => {
         startDate?: string;
         endDate?: string;
         branchName?: string;
+        scheduledBy?: string
     }
 
     interface Error {
@@ -130,7 +132,6 @@ const Batch = () => {
     };
 
     const fetchAllBranches = async () => {
-
         try {
             const response = await api.get(`${baseUrl}/api/branch/all`);
             // console.log(response.data?.branches)
@@ -154,9 +155,9 @@ const Batch = () => {
 
     function checkavailablityval() {
         let err: { [key: string]: string } = {};
-        if (!formData.branchName) {
-            err.branchId = "Branch is required";
-        }
+        // if (!formData.branchName) {
+        //     err.branchId = "Branch is required";
+        // }
         if (!formData.course) {
             err.courseId = "Course is required";
         }
@@ -179,12 +180,12 @@ const Batch = () => {
                 return;
             }
             let payload = {
-                "branchId": formData.branchName,
+                // "branchId": formData.branchName,
                 "courseId": formData.course,
                 "fromDate": formData.startDate,
                 "toDate": formData.endDate,
             }
-            const response = await api.post(`${baseUrl}/api/batch/available_inspectors`, payload)
+            const response = await api.post(`${baseUrl}/api/batch/available_instructors`, payload)
             const data = response.data
             setInstructer(data.availableInspectors)
         } catch (error) {
@@ -216,6 +217,7 @@ const Batch = () => {
             err.endDate = "End date cannot be before start date";
         }
         if (!formData.branchName) err.branchName = "Branch is required";
+        // if (!formData.scheduledBy) err.scheduledBy = "scheduledBy is required";
 
         setErrors(err)
 
@@ -227,17 +229,20 @@ const Batch = () => {
     const handleDelete = async (id: string) => {
         const prevBranches = [...branches];
 
-        setBranches((prev) => prev.filter((item) => item.id !== id));
+        setBatch((prev) => prev.filter((item) => item._id !== id));
 
         try {
             await api.delete(`${baseUrl}/api/batch/${id}`);
+            setDelopen(false)
+
         } catch (error) {
             console.error("Delete failed, rolling back:", error);
 
-            setBranches(prevBranches);
+            setBatch(prevBranches);
         }
     };
 
+   
 
 
     const handleEdit = async () => {
@@ -358,7 +363,7 @@ const Batch = () => {
                                         <TableCell>{b.code}</TableCell>
                                         <TableCell>{b.branchId?.branchName}</TableCell>
                                         <TableCell>{b.inspectorId?.name}</TableCell>
-                                        <TableCell>{b.scheduledBy?.first_name|| "NA"}</TableCell>
+                                        <TableCell>{b.scheduledBy?.first_name || "NA"}</TableCell>
                                         <TableCell>{b.courseId?.name}</TableCell>
                                         <TableCell> <Chip
                                             label={b.status}
@@ -570,7 +575,7 @@ const Batch = () => {
                                             </Dialog>
 
                                             {/* Delete Confirmation Dialog */}
-                                            <Dialog>
+                                            <Dialog open={delopen} onOpenChange={setDelopen}>
                                                 <DialogTrigger asChild>
                                                     <Button variant="destructive" className="flex items-center">
                                                         <Trash className="h-4 w-4 mr-2" />
@@ -594,9 +599,7 @@ const Batch = () => {
                                                         </DialogClose>
                                                         <Button
                                                             variant="destructive"
-                                                            onClick={() => {
-                                                                handleDelete(b._id)
-                                                            }}
+                                                            onClick={() => handleDelete(b._id)}
                                                         >
                                                             Yes, Delete
                                                         </Button>
@@ -648,7 +651,7 @@ const Batch = () => {
                                         <TableCell>{b.code}</TableCell>
                                         <TableCell>{b.branchId?.branchName}</TableCell>
                                         <TableCell>{b.inspectorId?.name}</TableCell>
-                                        <TableCell>{b.scheduledBy?.first_name|| "NA"}</TableCell>
+                                        <TableCell>{b.scheduledBy?.first_name || "NA"}</TableCell>
                                         <TableCell>{b.courseId?.name}</TableCell>
                                         <TableCell> <Chip
                                             label={b.status}
@@ -838,6 +841,21 @@ const Batch = () => {
                                                                 <p className="text-sm text-red-500">{errors.instructorName}</p>
                                                             )}
                                                         </div>
+                                                        {/* <div className="space-y-2 sm:col-span-2">
+                                                            <Label>Scheduled By *</Label>
+                                                            <Select onValueChange={(v) => handleChange("scheduledBy", v)}>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Person" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="admin">Admin</SelectItem>
+                                                                    <SelectItem value="manager">Manager</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                             {errors?.scheduledBy && (
+                                                                <p className="text-sm text-red-500">{errors.scheduledBy}</p>
+                                                            )}
+                                                        </div> */}
 
 
 
@@ -923,7 +941,7 @@ const Batch = () => {
                         <div className="flex justify-center items-center h-48">
                             <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                    ) : batchById  ? (
+                    ) : batchById ? (
                         <div className="space-y-6">
                             {/* Inspector Info */}
                             <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border">

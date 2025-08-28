@@ -57,7 +57,7 @@ export default function CourseDetails({ course }: { course: any }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {course.inspectorIds.map((inspector: any) => (
+              {course.instructorIds.map((inspector: any) => (
                 <TableRow key={inspector._id}>
                   <TableCell className="font-medium">{inspector.name}</TableCell>
                   <TableCell>{inspector.email}</TableCell>

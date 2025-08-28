@@ -40,8 +40,10 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { open, toggleSidebar, setOpen } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
+  const [opens, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     batch: "",
     batchName: "",
@@ -50,6 +52,7 @@ export function AppSidebar() {
     startDate: "",
     endDate: "",
     branchName: "",
+    scheduledBy: ""
   });
   interface ValidationErrors {
     batch?: string;
@@ -59,6 +62,7 @@ export function AppSidebar() {
     startDate?: string;
     endDate?: string;
     branchName?: string;
+    scheduledBy?: string
   }
 
   interface Error {
@@ -106,9 +110,9 @@ export function AppSidebar() {
 
   function checkavailablityval() {
     let err: { [key: string]: string } = {};
-    if (!formData.branchName) {
-      err.branchId = "Branch is required";
-    }
+    // if (!formData.branchName) {
+    //   err.branchId = "Branch is required";
+    // }
     if (!formData.course) {
       err.courseId = "Course is required";
     }
@@ -131,14 +135,14 @@ export function AppSidebar() {
         return;
       }
       let payload = {
-        "branchId": formData.branchName,
+        // "branchId": formData.branchName,
         "courseId": formData.course,
         "fromDate": formData.startDate,
         "toDate": formData.endDate,
       }
-      const response = await api.post(`${baseUrl}/api/batch/available_inspectors`, payload)
+      const response = await api.post(`${baseUrl}/api/batch/available_instructors`, payload)
       const data = response.data
-      setInstructer(data.availableInspectors)
+      setInstructer(data.availableInstructors)
     } catch (error) {
       console.error(error);
     }
@@ -169,6 +173,7 @@ export function AppSidebar() {
       err.endDate = "End date cannot be before start date";
     }
     if (!formData.branchName) err.branchName = "Branch is required";
+    // if (!formData.scheduledBy) err.scheduledBy = "ScheduledBy is required";
 
     setErrors(err)
 
@@ -180,7 +185,7 @@ export function AppSidebar() {
     if (!validateForm()) {
       return
     }
-
+    setLoading(true)
     try {
       const payload = {
         "branchId": formData.branchName,
@@ -188,8 +193,9 @@ export function AppSidebar() {
         "fromDate": formData.startDate,
         "toDate": formData.endDate,
         "code": formData.batch,
-        "inspectorId": formData.instructorName,
+        "instructorId": formData.instructorName,
         "name": formData.batchName,
+        // "scheduledBy":formData.scheduledBy
       }
       const result = await api.post(`${baseUrl}/api/batch/bookBatch`, payload)
       if (result.status === 201) {
@@ -204,9 +210,13 @@ export function AppSidebar() {
           startDate: ""
         })
       }
+      
     } catch (error) {
       console.error(error)
       toast.error("something happen while creating batch")
+    } finally {
+      setLoading(false)
+      setOpen(false)
     }
   };
 
@@ -256,8 +266,8 @@ export function AppSidebar() {
                             ? "bg-sky-500 text-white font-semibold shadow-sm hover:bg-sky-500"
                             : "text-gray-700 hover:bg-gray-100 hover:shadow-sm"
                           }`}
-                        onClick={()=>{
-                          if(window.innerWidth<768){
+                        onClick={() => {
+                          if (window.innerWidth < 768) {
                             toggleSidebar()
                           }
                         }}
@@ -277,7 +287,7 @@ export function AppSidebar() {
                 );
               })}
 
-              <Dialog>
+              <Dialog open={opens} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-blue-600 hover:bg-blue-700 gap-2 ">
                     <PlusCircle className="w-4 h-4" />
@@ -456,6 +466,9 @@ export function AppSidebar() {
                           <SelectItem value="manager">Manager</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors?.scheduledBy && (
+                        <p className="text-sm text-red-500">{errors.scheduledBy}</p>
+                      )}
                     </div> */}
                   </div>
 
@@ -465,10 +478,12 @@ export function AppSidebar() {
                       <Button variant="outline">Cancel</Button>
                     </DialogClose>
                     <Button
+                      type="submit"
                       className="bg-blue-600 hover:bg-blue-700"
                       onClick={handleSubmit}
+                      disabled={loading}
                     >
-                      Save
+                      {loading? "Saveing...":"Save"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
