@@ -910,12 +910,12 @@ const Batch = () => {
                 <DialogContent className="sm:max-w-[750px] rounded-2xl shadow-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-gray-800">
-                            {loadingBatch ? "Loading inspector..." : batchById?.name}
+                            {loadingBatch ? "Loading Batch..." : batchById?.name}
                         </DialogTitle>
                         <DialogDescription className="text-gray-500">
                             {loadingBatch
-                                ? "Fetching inspector details..."
-                                : "Here are the complete details of the selected inspector."}
+                                ? "Fetching Batch details..."
+                                : "Here are the complete details of the selected Batch."}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -923,7 +923,7 @@ const Batch = () => {
                         <div className="flex justify-center items-center h-48">
                             <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                    ) : batchById ? (
+                    ) : batchById  ? (
                         <div className="space-y-6">
                             {/* Inspector Info */}
                             <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border">
@@ -980,7 +980,7 @@ const Batch = () => {
                             {/* Courses */}
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                                    Assigned Courses
+                                    Assigned Batches
                                 </h3>
                                 {batchById.courseIds?.length > 0 ? (
                                     <Table>
@@ -1012,14 +1012,14 @@ const Batch = () => {
                                     </Table>
                                 ) : (
                                     <p className="text-sm text-gray-500 italic">
-                                        No courses assigned to this inspector.
+                                        No courses assigned to this Batch.
                                     </p>
                                 )}
                             </div>
                         </div>
                     ) : (
                         <p className="text-sm text-red-500 text-center py-6">
-                            Failed to load inspector details.
+                            Failed to load Batch details.
                         </p>
                     )}
 
