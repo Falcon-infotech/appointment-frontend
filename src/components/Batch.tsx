@@ -65,7 +65,7 @@ const Batch = () => {
 
                 return fromDate >= today && toDate >= today
             })
-            console.log(data)
+            console.log(filteredData)
             setFilteredBatch(filteredData)
             setBatch(data || [])
         } catch (error) {
@@ -95,6 +95,8 @@ const Batch = () => {
     useEffect(() => {
         fetchBatches(true)
     }, [])
+
+
 
     const [branches, setBranches] = useState([])
     const [courses, setCourses] = useState([]);
@@ -131,6 +133,8 @@ const Batch = () => {
         }
     };
 
+
+
     const fetchAllBranches = async () => {
         try {
             const response = await api.get(`${baseUrl}/api/branch/all`);
@@ -140,6 +144,23 @@ const Batch = () => {
             console.error("Error fetching branches:", error);
         }
     };
+    const BrancheByID = async (id: string) => {
+        try {
+            const response = await api.get(`${baseUrl}/api/branch/${id}`);
+            setCourses(response.data.branch?.courseIds || [])
+        } catch (error) {
+            console.error("Error fetching branches:", error);
+        }
+    };
+
+
+    useEffect(() => {
+
+
+        if (formData.branchName) {
+            BrancheByID(formData.branchName);
+        }
+    }, [formData.branchName])
 
     const fetchCourses = async () => {
         try {
@@ -155,9 +176,9 @@ const Batch = () => {
 
     function checkavailablityval() {
         let err: { [key: string]: string } = {};
-        // if (!formData.branchName) {
-        //     err.branchId = "Branch is required";
-        // }
+        if (!formData.branchName) {
+            err.branchId = "Branch is required";
+        }
         if (!formData.course) {
             err.courseId = "Course is required";
         }
@@ -180,14 +201,14 @@ const Batch = () => {
                 return;
             }
             let payload = {
-                // "branchId": formData.branchName,
+                "branchId": formData.branchName,
                 "courseId": formData.course,
                 "fromDate": formData.startDate,
                 "toDate": formData.endDate,
             }
             const response = await api.post(`${baseUrl}/api/batch/available_instructors`, payload)
             const data = response.data
-            setInstructer(data.availableInspectors)
+            setInstructer(data.availableInstructors )
         } catch (error) {
             console.error(error);
         }
@@ -242,11 +263,10 @@ const Batch = () => {
         }
     };
 
-   
+
 
 
     const handleEdit = async () => {
-        console.log(editingId)
         if (!validateForm()) return;
 
         const prevBatches = [...batch];
@@ -370,7 +390,7 @@ const Batch = () => {
                                             color={getStatusColor(b.status)}
                                             variant="outlined"
                                         /></TableCell>
-                                        <TableCell>{b.inspectorId?.phone}</TableCell>
+                                        <TableCell>{b.instructorId?.phone}</TableCell>
                                         <TableCell>
                                             {new Date(b.fromDate).toLocaleDateString("en-GB", {
                                                 day: "2-digit",
@@ -402,7 +422,7 @@ const Batch = () => {
                                                                 course: b.courseId?._id || "",
                                                                 startDate: b.fromDate?.split("T")[0] || "",
                                                                 endDate: b.toDate?.split("T")[0] || "",
-                                                                instructorName: b.inspectorId?._id || "",
+                                                                instructorName: b.instructorId?._id || "",
                                                             });
                                                             setEditingId(b._id);
                                                         }}
@@ -531,28 +551,26 @@ const Batch = () => {
 
 
                                                         {/* Instructor */}
-                                                        <div className="space-y-2">
-                                                            <Label>Instructor Name *</Label>
-                                                            <Select onValueChange={(v) => handleChange("instructorName", v)}>
-                                                                <SelectTrigger className="w-full">
-                                                                    <SelectValue placeholder="Select Instructor" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {instructer?.length === 0 ? (
-                                                                        <p className="text-gray-500 px-2 py-1">No Instructor available</p>
-                                                                    ) : (
-                                                                        instructer?.map((b) => (
-                                                                            <SelectItem key={b._id} value={b._id}>
-                                                                                {b.name}
-                                                                            </SelectItem>
-                                                                        ))
-                                                                    )}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            {errors?.instructorName && (
-                                                                <p className="text-sm text-red-500">{errors.instructorName}</p>
-                                                            )}
-                                                        </div>
+                                                        <Select
+                                                            onValueChange={(v) => handleChange("instructorName", v)}
+                                                            value={formData.instructorName}
+                                                        >
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder="Select Instructor" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {instructer && instructer.length > 0 ? (
+                                                                    instructer.map((b) => (
+                                                                        <SelectItem key={b._id} value={b._id}>
+                                                                            {b.name}
+                                                                        </SelectItem>
+                                                                    ))
+                                                                ) : (
+                                                                    <SelectItem disabled value="no-data">No Instructor available</SelectItem>
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+
 
 
 

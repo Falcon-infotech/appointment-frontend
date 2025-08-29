@@ -11,6 +11,7 @@ import ProfilePage from "./pages/Profile";
 import Instructor from "./components/Instructor";
 import Batch from "./components/Batch";
 import Settings from "./components/Settings";
+import Reports from "./pages/Reports";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
             <Route path="/instructor" element={<Instructor/>} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/reports" element={<Reports />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
