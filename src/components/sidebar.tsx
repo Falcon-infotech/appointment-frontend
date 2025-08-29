@@ -6,6 +6,7 @@ import {
   Users,
   LayoutDashboard,
   PlusCircle,
+  ReceiptPoundSterlingIcon,
 } from "lucide-react";
 
 import {
@@ -37,6 +38,7 @@ const items = [
   { title: "Courses", url: "/courses", icon: Book },
   { title: "Instructor", url: "/instructor", icon: Users },
   { title: "Batches", url: "/batches", icon: BarChartHorizontalBig },
+  { title: "Reports", url: "/reports", icon: ReceiptPoundSterlingIcon },
 ];
 
 export function AppSidebar() {
