@@ -4,10 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link, useOutletContext } from "react-router-dom";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+
 import axios from "../constants/axiosInstance";
 import toast from "react-hot-toast";
 import EnhancedTable from "./Table";
@@ -79,7 +76,7 @@ export function DashboardArea() {
       setDashboardData(data.batches || []);
       setTotals({
         totalBatches: data.totalBatches,
-        totalInspectors: data.totalInspectors,
+        totalInspectors: data.totalInstructors,
         totalCourses: data.totalCourses,
         totalBranches: data.totalBranches,
       });

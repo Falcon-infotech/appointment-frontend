@@ -6,6 +6,7 @@ import {
   Users,
   LayoutDashboard,
   PlusCircle,
+  ReceiptPoundSterlingIcon,
 } from "lucide-react";
 
 import {
@@ -37,6 +38,7 @@ const items = [
   { title: "Courses", url: "/courses", icon: Book },
   { title: "Instructor", url: "/instructor", icon: Users },
   { title: "Batches", url: "/batches", icon: BarChartHorizontalBig },
+  { title: "Reports", url: "/reports", icon: ReceiptPoundSterlingIcon },
 ];
 
 export function AppSidebar() {
@@ -85,6 +87,29 @@ export function AppSidebar() {
   })
   const [errors, setErrors] = useState<ValidationErrors>({});
 
+
+  const getById = async (id: string) => {
+    try {
+      const response = await api.get(`${baseUrl}/api/branch/${id}`);
+      setCourses(response.data.branch?.courseIds)
+    } catch (error) {
+      console.error("Error fetching branch:", error);
+    } finally {
+      // setLoadingBranch(false);
+    }
+  };
+
+  useEffect(() => {
+
+
+    if (formData.branchName) {
+      getById(formData.branchName); 
+    }
+  }, [formData.branchName])
+
+
+
+
   const fetchAllBranches = async () => {
 
     try {
@@ -100,7 +125,7 @@ export function AppSidebar() {
     try {
       const response = await api.get(`${baseUrl}/api/course/all`)
       const data = response.data
-      // console.log(data.courses)
+
       setCourses(data.courses)
     } catch (error) {
       console.error(error);
@@ -110,9 +135,9 @@ export function AppSidebar() {
 
   function checkavailablityval() {
     let err: { [key: string]: string } = {};
-    // if (!formData.branchName) {
-    //   err.branchId = "Branch is required";
-    // }
+    if (!formData.branchName) {
+      err.branchId = "Branch is required";
+    }
     if (!formData.course) {
       err.courseId = "Course is required";
     }
@@ -135,7 +160,7 @@ export function AppSidebar() {
         return;
       }
       let payload = {
-        // "branchId": formData.branchName,
+        "branchId": formData.branchName,
         "courseId": formData.course,
         "fromDate": formData.startDate,
         "toDate": formData.endDate,
@@ -210,7 +235,7 @@ export function AppSidebar() {
           startDate: ""
         })
       }
-      
+
     } catch (error) {
       console.error(error)
       toast.error("something happen while creating batch")
@@ -483,7 +508,7 @@ export function AppSidebar() {
                       onClick={handleSubmit}
                       disabled={loading}
                     >
-                      {loading? "Saveing...":"Save"}
+                      {loading ? "Saving..." : "Save"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>

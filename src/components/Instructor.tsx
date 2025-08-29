@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Users2, Edit, Trash2, Trash } from "lucide-react";
+import { Plus, Users2, Edit, Trash2, Trash, CalendarIcon } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -21,12 +21,24 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import api from "@/constants/axiosInstance";
 import { baseUrl } from "@/lib/base";
 import toast from "react-hot-toast";
+import { Calendar } from "./ui/calendar";
+import { format, startOfToday, endOfToday, subDays, startOfMonth, endOfMonth } from "date-fns";
 
 type Instructor = {
-  _id?: string | number;  
+  _id?: string | number;
   name: string;
   email: string;
   phone: number;
@@ -43,11 +55,12 @@ const Instructor = () => {
   const [drawer, setDrawer] = useState<Boolean>(false)
   const [loadingInstructer, setLoadingInstructer] = useState(false);
   const [inspectorById, setInstructorById] = useState<Instructor>({
-    email:"",
-    name:"",
-    phone:0,
-    _id:""
+    email: "",
+    name: "",
+    phone: 0,
+    _id: ""
   })
+  const [response, setResponse] = useState<any>(null);
 
 
   const handleRowClick = (id: any) => {
@@ -60,13 +73,13 @@ const Instructor = () => {
     try {
       setLoadingInstructer(true);
       setInstructorById({
-        email:"",
-        name:"",
-        phone:0,
-        _id:""
+        email: "",
+        name: "",
+        phone: 0,
+        _id: ""
       });
       const response = await api.get(`${baseUrl}/api/instructor/${id}`);
-      setInstructorById(response.data.inspector||[]);
+      setInstructorById(response.data.inspector || []);
     } catch (error) {
       console.error("Error fetching branch:", error);
     } finally {
@@ -82,7 +95,7 @@ const Instructor = () => {
         const res = await api.get(`${baseUrl}/api/instructor/all`);
         const data = res.data?.instructors;
         // console.log(data)
-        setInstructors(data||[]);
+        setInstructors(data || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -213,47 +226,54 @@ const Instructor = () => {
           <h2 className="text-xl font-semibold">Instructor Management</h2>
         </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md hover:opacity-90 transition" onClick={() => resetForm()}>
-              <Plus className="h-4 w-4 mr-2" /> Add Instructor
-            </Button>
-          </DialogTrigger>
-
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold">
-                Add New Instructor
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4 mt-4">
-              {["name", "email", "phone"].map((key) => (
-                <div key={key} className="space-y-2">
-                  <Label htmlFor={key} className="capitalize">
-                    {key} *
-                  </Label>
-                  <Input
-                    id={key}
-                    name={key}
-                    type={key === "phone" ? "number" : "text"}
-                    placeholder={`Enter ${key}`}
-                    value={(form as any)[key]}
-                    onChange={handleChange}
-                  />{
-                    err[key] && <p className="text-red-500">{err[key]}</p>
-                  }
-                </div>
-              ))}
-              <Button
-                onClick={handleAddOrUpdate}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white"
-              >
-                {editingId ? "Update Instructor" : "Add Instructor"}
+        <div className="flex items-center gap-5 max-sm:flex-col max-sm:items-end">
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md hover:opacity-90 transition" onClick={() => resetForm()}>
+                <Plus className="h-4 w-4 mr-2" /> Add Instructor
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-semibold">
+                  Add New Instructor
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 mt-4">
+                {["name", "email", "phone"].map((key) => (
+                  <div key={key} className="space-y-2">
+                    <Label htmlFor={key} className="capitalize">
+                      {key} *
+                    </Label>
+                    <Input
+                      id={key}
+                      name={key}
+                      type={key === "phone" ? "number" : "text"}
+                      placeholder={`Enter ${key}`}
+                      value={(form as any)[key]}
+                      onChange={handleChange}
+                    />{
+                      err[key] && <p className="text-red-500">{err[key]}</p>
+                    }
+                  </div>
+                ))}
+                <Button
+                  onClick={handleAddOrUpdate}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                >
+                  {editingId ? "Update Instructor" : "Add Instructor"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+
+          <Button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md">
+            Report
+          </Button>
+        </div>
       </div>
 
       {/* Table Section */}
