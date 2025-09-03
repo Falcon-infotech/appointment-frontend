@@ -79,7 +79,7 @@ const Instructor = () => {
         _id: ""
       });
       const response = await api.get(`${baseUrl}/api/instructor/${id}`);
-      setInstructorById(response.data.inspector || []);
+      setInstructorById(response.data.instructor || []);
     } catch (error) {
       console.error("Error fetching branch:", error);
     } finally {
