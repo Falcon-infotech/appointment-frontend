@@ -1,8 +1,9 @@
 import CountUp from "react-countup";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, CloudCog } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const DashboardMetrics = ({ totals }) => {
+  console.log("Totals in DashboardMetrics:", totals);
   const metrics = [
     {
       title: "Total Batches",
