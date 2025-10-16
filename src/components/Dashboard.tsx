@@ -12,6 +12,9 @@ import { baseUrl } from "@/lib/base";
 import api from "../constants/axiosInstance";
 import DashboardMetrics from "./DashboardMetrics ";
 import UpcomingBatchSchedule from "./UpcomingBatchSchedule";
+import { fetchBatches } from "@/store/Slices/Company.Slice";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 interface Company {
   id: string;
   name: string;
@@ -21,9 +24,7 @@ interface Company {
   status: "active" | "inactive" | "pending";
 }
 
-interface DashboardAreaProps {
-  selectedCompany: Company | null;
-}
+
 
 interface MetricCard {
   title: string;
@@ -44,8 +45,6 @@ type Instructor = {
 
 export function DashboardArea() {
   const [metrics, setMetrics] = useState<MetricCard[]>([]);
-  const { selectedCompany } = useOutletContext<{ selectedCompany: Company | null }>();
-  const [showPassword, setShowPassword] = useState(false);
   const [open, setOpen] = useState(false);
 
   const [dashboardData, setDashboardData] = useState([])
@@ -59,33 +58,35 @@ export function DashboardArea() {
     password: "",
     phone: "+91",
   });
+const dispatch=useDispatch()
+const {Batches,loadingBatches}=useSelector((state:any)=>state.company)
+  // const [totals, setTotals] = useState({
+  //   totalBatches: 0,
+  //   totalInspectors: 0,
+  //   totalCourses: 0,
+  //   totalBranches: 0,
+  // });
 
-  const [totals, setTotals] = useState({
-    totalBatches: 0,
-    totalInspectors: 0,
-    totalCourses: 0,
-    totalBranches: 0,
-  });
+    useEffect(() => {
+  if (Object.keys(Batches).length === 0) {
+    dispatch(fetchBatches() as any);
+  }
+}, [Batches, dispatch]);
 
-  const fetchBatches = async (flag: boolean) => {
-    if (flag) setLoading(true);
-    try {
-      const response = await api.get(`${baseUrl}/api/batch/all`);
-      const data = response.data;
-      // console.log(data)
-      setDashboardData(data.batches || []);
-      setTotals({
-        totalBatches: data.totalBatches,
-        totalInspectors: data.totalInstructors,
-        totalCourses: data.totalCourses,
-        totalBranches: data.totalBranches,
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchBatches = async (flag: boolean) => {
+  //   if (flag) setLoading(true);
+  //   try {
+  //     const response = await api.get(`${baseUrl}/api/batch/all`);
+  //     const data = response.data;
+  //     // console.log(data)
+  //     setDashboardData(data.batches || []);
+     
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
@@ -212,13 +213,13 @@ export function DashboardArea() {
       </div>
 
    
-      <DashboardMetrics totals={totals} />
-      <EnhancedTable data={dashboardData} />
+      <DashboardMetrics />
+      <EnhancedTable data={Batches.batches} />
 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
        
-        <UpcomingBatchSchedule data={dashboardData} />
+        <UpcomingBatchSchedule data={Batches.batches} />
 
       
         <div>

@@ -1,12 +1,25 @@
 import CountUp from "react-countup";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, CloudCog } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { fetchBatches } from "@/store/Slices/Company.Slice";
 
-const DashboardMetrics = ({ totals }) => {
+const DashboardMetrics = ({  }) => {
+
+
+  const {Batches,loadingBatches}=useSelector((state:any)=>state.company)
+  const dispatch=useDispatch()
+
+
+
+
+  // console.log("Totals in DashboardMetrics:", totals);
   const metrics = [
     {
       title: "Total Batches",
-      value: totals.totalBatches,
+      value: Batches.totalBatches,
       change: "+2%",
       trend: "up",
       color: "blue",
@@ -15,7 +28,7 @@ const DashboardMetrics = ({ totals }) => {
     },
     {
       title: "Total Instructors",
-      value: totals.totalInspectors,
+      value: Batches.totalInstructors,
       change: "+5%",
       trend: "up",
       color: "green",
@@ -24,7 +37,7 @@ const DashboardMetrics = ({ totals }) => {
     },
     {
       title: "Total Courses",
-      value: totals.totalCourses,
+      value: Batches.totalCourses,
       change: "-1%",
       trend: "down",
       color: "red",
@@ -33,7 +46,7 @@ const DashboardMetrics = ({ totals }) => {
     },
     {
       title: "Total Branches",
-      value: totals.totalBranches,
+      value: Batches.totalBranches,
       change: "+3%",
       trend: "up",
       color: "purple",

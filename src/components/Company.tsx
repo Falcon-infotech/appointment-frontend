@@ -52,6 +52,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import api from "../constants/axiosInstance";
+import MultiSelect from "./MultiSelect";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { fetchCourse } from "@/store/Slices/Company.Slice";
 
 interface Branch {
   _id: string;
@@ -78,16 +83,27 @@ export default function Company() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [err, setErr] = useState<{ [key: string]: string } | null>(null);
-  const [open, setOpen] = useState(false);
   const [addloading, setAddLoading] = useState(false);
-  // {{base_url}}/api/branch/:id
-  // Add/Edit mode states
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranchId, setEditingBranchId] = useState<string | null>(null);
   const [courses, setCourses] = useState<string[]>([]);
-  const [branchById, setBranchById] = useState<Branch>()
-  const [drawer, setDrawer] = useState<Boolean>(false)
+  const [branchById, setBranchById] = useState({} as Branch);
+  const [drawer, setDrawer] = useState<boolean | undefined>(false)
   const [loadingBranch, setLoadingBranch] = useState(false);
+
+
+
+  const dispatch = useDispatch();
+
+  const { courses: AllCourse } = useSelector((state: RootState) => state.company)
+
+  useEffect(() => {
+    if (AllCourse.length === 0) {
+      dispatch(fetchCourse() as any);
+    }
+  }, [dispatch, AllCourse.length]);
+
 
   const [newCompany, setNewCompany] = useState<NewCompany>({
     branchName: "",
@@ -124,34 +140,34 @@ export default function Company() {
   };
 
 
-  const handleCourseChange = (courseId: string) => {
-    setNewCompany((prev) => {
-      if (prev.courseIds?.includes(courseId)) {
-        return {
-          ...prev,
-          courseIds: prev.courseIds.filter((id) => id !== courseId),
-        };
-      } else {
-        return {
-          ...prev,
-          courseIds: [...(prev.courseIds || []), courseId],
-        };
-      }
-    });
-  };
+  // const handleCourseChange = (courseId: string) => {
+  //   setNewCompany((prev) => {
+  //     if (prev.courseIds?.includes(courseId)) {
+  //       return {
+  //         ...prev,
+  //         courseIds: prev.courseIds.filter((id) => id !== courseId),
+  //       };
+  //     } else {
+  //       return {
+  //         ...prev,
+  //         courseIds: [...(prev.courseIds || []), courseId],
+  //       };
+  //     }
+  //   });
+  // };
 
-  const fetchCourses = async () => {
-    try {
-      const response = await axios.get(`${baseUrl}/api/course/all`);
-      setCourses(response.data.courses);
-    } catch (error) {
-      console.error(error);
+  useEffect(() => {
+    if (AllCourse.length > 0) {
+      const courseoptions = AllCourse.map((course: any) => ({
+        value: course._id,
+        label: course.name,
+      }));
+      setCourses(courseoptions);
     }
-  };
+  }, [AllCourse]);
 
   useEffect(() => {
     fetchAllBranches(true);
-    fetchCourses();
   }, []);
 
   // initial load
@@ -231,7 +247,16 @@ export default function Company() {
   const getById = async (id: string) => {
     try {
       setLoadingBranch(true);
-      setBranchById(null);
+      setBranchById({
+        _id: "",
+        branchName: "",
+        country: "",
+        branchCode: "",
+        address: "",
+        courseIds: [],
+        createdAt: "",
+        updatedAt: "",
+      });
       const response = await api.get(`${baseUrl}/api/branch/${id}`);
       setBranchById(response.data.branch);
     } catch (error) {
@@ -348,7 +373,7 @@ export default function Company() {
 
 
               {/* Courses */}
-              <Popover open={open} onOpenChange={setOpen}>
+              {/* <Popover open={open} onOpenChange={setOpen}>
                 <Label>
                   Courses
                 </Label>
@@ -365,7 +390,7 @@ export default function Company() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0">
+                <PopoverContent className="p-0" >
                   <Command>
                     <CommandInput placeholder="Search..." />
                     <CommandEmpty>No item found.</CommandEmpty>
@@ -390,7 +415,21 @@ export default function Company() {
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
+
+              <Label>
+                Courses
+              </Label>
+              <MultiSelect
+                options={courses}
+                value={newCompany?.courseIds || []}
+                onChange={(val) =>
+                  setNewCompany({
+                    ...newCompany,
+                    courseIds: val,
+                  })
+                }
+              />
 
               <Button
                 onClick={handleSubmitCompany}
