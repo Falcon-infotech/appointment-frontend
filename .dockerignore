@@ -1,0 +1,25 @@
+# Node modules (we install fresh inside Docker)
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# Vite build output (we rebuild inside Docker)
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE / OS files
+.vscode
+.DS_Store

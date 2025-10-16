@@ -13,6 +13,10 @@ import axios from "../constants/axiosInstance";
 import MultiSelect from "./MultiSelect";
 import toast from "react-hot-toast";
 import api from "../constants/axiosInstance";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { AddCourse } from "@/store/Slices/Company.Slice";
 
 interface Company {
   id: string;
@@ -52,13 +56,7 @@ export function CoursesSection({ company }: CoursesSectionProps) {
   const [updateOpen, setUpdateOpen] = useState<boolean>(false)
 
 
-  const options = [
-    { id: "html", label: "HTML" },
-    { id: "css", label: "CSS" },
-    { id: "js", label: "JavaScript" },
-    { id: "react", label: "React" },
-  ]
-
+  
   const getLevelColor = (level: string) => {
     switch (level) {
       case "beginner": return "bg-success text-white";
@@ -67,6 +65,9 @@ export function CoursesSection({ company }: CoursesSectionProps) {
       default: return "bg-muted text-muted-foreground";
     }
   };
+  const dispatch=useDispatch();
+
+  // const {AddCourses} =useSelector((state:RootState)=>state.company)
 
 
   useEffect(() => {
@@ -92,10 +93,10 @@ export function CoursesSection({ company }: CoursesSectionProps) {
           label: b.branchName,
         }));
 
-       
+// 
 
-        setInstructer(inspectorOptions||[]);
-        setBranch(branchOptions||[]);
+        setInstructer(inspectorOptions || []);
+        setBranch(branchOptions || []);
       } catch (error) {
         console.error(error);
       }
@@ -145,21 +146,26 @@ export function CoursesSection({ company }: CoursesSectionProps) {
 
   const AddCourses = async () => {
     try {
-      setAddLoading(true)
-      const result = await axios.post(`${baseUrl}/api/course/create`, formData)
-      if (result.status === 201) {
-        setAddOpen(false)
-        setFormData({
-          name: "",
-          description: "",
-          inspectorIds: [],
-          branchIds: []
-        })
-        setCourses((prev) => {
-          return [...prev, result.data?.course]
-        })
-        toast.success("Course added succefully")
-      }
+      // setAddLoading(true)
+      // const result = await axios.post(`${baseUrl}/api/course/create`, formData)
+      // if (result.status === 201) {
+      //   setAddOpen(false)
+      //   setFormData({
+      //     name: "",
+      //     description: "",
+      //     inspectorIds: [],
+      //     branchIds: []
+      //   })
+      //   setCourses((prev) => {
+      //     return [...prev, result.data?.course]
+      //   })
+      //   toast.success("Course added succefully")
+      // }
+
+
+      dispatch(AddCourse(formData) as any)
+              setAddOpen(false)
+
     } catch (error) {
       console.error(error);
     } finally {
